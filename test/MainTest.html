@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Darwin Test</title>
+	</head>
+	<body>
+		<script src="../src/Darwin.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			let characterSet = 'abcdefghijklmnopqrstuvwxyz';
+			
+			let bitTest = new BitChromosome(5);
+			bitTest.generate();
+			console.log(bitTest.toString());
+			console.log(bitTest.toArray());
+
+			console.log('-'.repeat(10));
+
+			let charTest = new CharChromosome(characterSet, 5);
+			charTest.generate();
+			console.log(charTest.toString());
+			console.log(charTest.toArray());
+
+			console.log('-'.repeat(10));
+
+			let intTest = new IntChromosome(false, -5, 5, 5);
+			intTest.generate();
+			console.log(intTest.toString());
+			console.log(intTest.toArray());
+
+			console.log('-'.repeat(10));
+			
+			let fltTest = new FloatChromosome(false, -5, 5, 5);
+			fltTest.generate();
+			console.log(fltTest.toString());
+			console.log(fltTest.toArray());
+			
+			console.log('-'.repeat(10));
+
+			let dblTest = new DoubleChromosome(false, -5, 5, 5);
+			dblTest.generate();
+			console.log(dblTest.toString());
+			console.log(dblTest.toArray());
+
+			console.log('-'.repeat(10));
+
+			let popTest = new Population(5);
+				popTest.generate(new CharChromosome(characterSet, 5), []);
+
+			let d = new Darwin();
+				//d.template  = new CharChromosome(characterSet, 5);
+				d.template = new FloatChromosome(false, -5, 5, 5);
+				//d.template = new IntChromosome(false, -5, 5, 5);
+				d.genParams = [];
+
+				d.popSize        = 50;
+				d.mutationRate   = 0.5;
+				d.mutationRange  = 0.5;
+				d.crossoverRate  = 0.9;
+				d.elitism        = 0.1;
+				d.newChromosomes = 0.1;
+				d.noBinary       = true;
+				d.fittest        = Covington.fittest.biggerIsBetter;
+
+				d.selection = Covington.selection.RouletteWheel;
+				//d.crossover = Covington.crossover.TwoPointNonBinary;
+				d.crossover = Covington.crossover.ArithmeticBlend;
+				d.mutation  = Covington.mutation.Multiplication;
+				//d.mutation  = Covington.mutation.BitFlip;
+
+				d.newPopulation();
+
+				console.log(d.getPopulation().getGeneValuesFlat());
+
+				for(let i = 0; i < d.getPopulation().getChromosomes().length; i++) {
+					d.getPopulation().getChromosomes()[i].setFitness(Math.floor(Math.random() * 10));
+				}
+
+				d.nextGeneration();
+
+				console.log(d.getPopulation().getGeneValuesFlat());
+		</script>
+	</body>
+</html>
