@@ -8,14 +8,15 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "lint": "tslint --project \"./tsconfig.json\"",
-    "test": "jest"
+    "test": "jest --color --coverage --notify"
   },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "moduleFileExtensions": [ "ts", "js" ],
-    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$"
+    "moduleFileExtensions": [ "ts", "tsx", "js", "jsx", "json", "node" ],
+    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "testEnvironment": "node"
   },
   "repository": {
     "type": "git",
