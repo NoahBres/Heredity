@@ -17,7 +17,6 @@ describe("Generic Chromosome", () => {
 
   test("Duplicate chromosome", () => {
     const dupe = chrom.duplicate();
-    // expect(dupe).toEqual(chrom);
     expect(dupe).toEqual(chrom);
   });
 

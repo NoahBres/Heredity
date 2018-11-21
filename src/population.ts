@@ -7,6 +7,9 @@ export default class Population {
   constructor(size: number, chromosomes: GenericChromosome<any>[] = []) {
     this._chromosomes = chromosomes;
     this._size = size;
+    
+    if(this._chromosomes.length == 0)
+      this._chromosomes = new Array(this._size);
   }
 
   generate(templateChromosome: GenericChromosome<any>): Population {
@@ -37,11 +40,12 @@ export default class Population {
         top = val;
       }
 
-      return {
-        index: index,
-        fitness: this._chromosomes[index].fitness,
-        chromosome: this._chromosomes[index]
-      }
+    }
+    
+    return {
+      index: index,
+      fitness: this._chromosomes[index].fitness,
+      chromosome: this._chromosomes[index]
     }
   }
 
@@ -70,8 +74,11 @@ export default class Population {
     this._chromosomes.sort((a, b) => b.fitness - a.fitness);
   }
 
-  setFitness(scores: number[]) {
-    this._chromosomes.forEach((val, index) => val.fitness = scores[index]);
+  setFitness(scores: number[] | number, index = 0) {
+    if(scores instanceof Array)
+      this._chromosomes.forEach((val, index) => val.fitness = scores[index]);
+    else
+      this._chromosomes[index].fitness = scores;
   }
 
   getGenes(): any[] {
