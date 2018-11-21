@@ -40,7 +40,7 @@ describe("Population", () => {
     expect(pop.lowestChromosome().index).toBe(3);
   });
 
-  test("Set chromosome", () => {
+  test("Set fitness", () => {
     pop.generate(new NumberChromosome({}, 5));
     pop.setFitness([5, 10, 50, 6, 99]);
     expect(pop.chromosomes[2].fitness).toBe(50);

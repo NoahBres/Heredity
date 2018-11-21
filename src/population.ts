@@ -28,7 +28,7 @@ export default class Population {
     return new Population(this._size, this._chromosomes);
   }
 
-  topChromosome() {
+  topChromosome(): TopChromosomeObject {
     let top = this._chromosomes[0].fitness;
 
     let index = 0;
@@ -49,7 +49,7 @@ export default class Population {
     }
   }
 
-  lowestChromosome() {
+  lowestChromosome(): TopChromosomeObject {
 		let low = this._chromosomes[0].fitness;
 		
 		let index = 0;
@@ -106,4 +106,10 @@ export default class Population {
   get size(): number {
     return this._chromosomes.length;
   }
+}
+
+interface TopChromosomeObject {
+  index: number,
+  fitness: number,
+  chromosome: GenericChromosome<any>
 }
