@@ -1,5 +1,6 @@
 import Darwin from "../src/index";
 import { GenericChromosome, NumberChromosome } from "../src/chromosomes";
+import Population from "../src/population";
 
 describe("Darwin", () => {
   let d: Darwin;
@@ -17,8 +18,8 @@ describe("Darwin", () => {
 
   test("Check if population is initiated correctly", () => {
     d.generatePopulation();
-    expect(d.population.size).toBe(5);
-    expect(d.population.getGenesFlat().length).toBe(25);
+    expect(d.getGenes().length).toBe(5);
+    expect(d.getGenesFlat().length).toBe(25);
   });
 
   test("Get top chromosome", () => {
@@ -38,6 +39,25 @@ describe("Darwin", () => {
     d.generatePopulation();
     d.setFitness([5, 10, 50, 6, 99]);
     expect(d.chromosomes[2].fitness).toBe(50);
+  });
+
+  test("Set population", () => {
+    let p = new Population(6);
+    d.population = p;
+    expect(p).toStrictEqual(d.population);
+  });
+
+  test("Next generation", () => {
+    d = new Darwin({
+      populationSize: 50,
+      templateChromosome: new NumberChromosome({}, 5)
+    });
+    d.generatePopulation();
+    d.setFitness(new Array(50).fill(1).map(() => Math.floor(Math.random() * 500)));
+    const p = d.population.duplicate();
+    d.nextGeneration();
+
+    expect(d.getGenesFlat()).not.toStrictEqual(p.getGenesFlat());
   });
 });
 

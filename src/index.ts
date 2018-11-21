@@ -19,7 +19,7 @@ export default class Darwin {
   private _population: Population;
 
   constructor({
-    populationSize = 50,
+    populationSize,
     templateChromosome,
     mutationRate = 0.2,
     mutationRange = 0.5,
@@ -45,7 +45,35 @@ export default class Darwin {
   }
 
   nextGeneration(): Darwin {
+    this._history.push(this._population.duplicate());
     this._population.sort();
+
+    let elitistCount = Math.floor(this._elitism * this._population.size);
+		let freshCount = Math.floor(this._newChromosomes * this._population.size);
+		let operationCount = this._population.size - (elitistCount + freshCount);
+		let crossCount = Math.round(operationCount * this._crossoverRate);
+			crossCount = (crossCount % 2) == 0 ? crossCount : crossCount - 1;
+		let plebCount = operationCount - crossCount;
+
+		console.log({ elitistCount, freshCount, operationCount, crossCount, plebCount });
+
+		let totalChromosomes = [];
+		let elitistChromosomes = [];
+		let freshChromosomes = [];
+		let crossedChromosomes = [];
+		let plebChromosomes = [];
+
+    for(let i = 0; i < elitistCount; i++) {
+      elitistChromosomes.push(this._population.chromosomes[i]);
+    }
+
+    let fresh = new Population(freshCount);
+    fresh.generate(this._templateChromosome.duplicate());
+    freshChromosomes = fresh.chromosomes;
+
+    console.log(freshChromosomes);
+
+    // const toBeCrossed = this._se
 
     return this;
   }
@@ -60,6 +88,14 @@ export default class Darwin {
   
   lowestChromosome(): TopChromosomeObject {
     return this._population.lowestChromosome();
+  }
+
+  getGenes() {
+    return this._population.getGenes();
+  }
+
+  getGenesFlat() {
+    return this._population.getGenesFlat();
   }
 
   get population(): Population {
