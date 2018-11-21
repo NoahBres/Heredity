@@ -1,5 +1,7 @@
 import { GenericChromosome } from "./chromosomes";
 import Population from "./population";
+import { RankSelect } from "./selections";
+import { UniformCross } from "./crossovers";
 
 export default class Darwin {
   private _populationSize: number;
@@ -10,8 +12,14 @@ export default class Darwin {
   private _elitism: number;
   private _newChromosomes: number;
 
-  // private _selection: (chromosomes: GenericChromosome<any>[], num: number) => GenericChromosome<any>[];
-  // private _crossover: (parent1: GenericChromosome<any>, parent2: GenericChromosome<any>) => GenericChromosome<any>[];
+  private _selection: (
+    chromosomes: GenericChromosome<any>[],
+    num: number
+  ) => GenericChromosome<any>[];
+  private _crossover: (
+    parent1: GenericChromosome<any>,
+    parent2: GenericChromosome<any>
+  ) => GenericChromosome<any>[];
   // private _mutation: (chromosomes: GenericChromosome<number>[], chance: number, mutationRange: number) => GenericChromosome<any>[]
 
   private _history: Population[] = [];
@@ -25,7 +33,10 @@ export default class Darwin {
     mutationRange = 0.5,
     crossoverRate = 0.9,
     elitism = 0.1,
-    newChromosomes = 0.1
+    newChromosomes = 0.1,
+
+    selection = RankSelect,
+    crossover = UniformCross
   }: ConstructorOptions) {
     this._populationSize = populationSize;
     this._templateChromosome = templateChromosome;
@@ -34,13 +45,15 @@ export default class Darwin {
     this._crossoverRate = crossoverRate;
     this._elitism = elitism;
     this._newChromosomes = newChromosomes;
-  
+
     this._population = new Population(this._populationSize);
+    this._selection = selection;
+    this._crossover = crossover;
   }
 
   generatePopulation(): Darwin {
     this._population.generate(this._templateChromosome.duplicate());
-    
+
     return this;
   }
 
@@ -49,21 +62,28 @@ export default class Darwin {
     this._population.sort();
 
     let elitistCount = Math.floor(this._elitism * this._population.size);
-		let freshCount = Math.floor(this._newChromosomes * this._population.size);
-		let operationCount = this._population.size - (elitistCount + freshCount);
-		let crossCount = Math.round(operationCount * this._crossoverRate);
-			crossCount = (crossCount % 2) == 0 ? crossCount : crossCount - 1;
-		let plebCount = operationCount - crossCount;
+    let freshCount = Math.floor(this._newChromosomes * this._population.size);
+    let operationCount = this._population.size - (elitistCount + freshCount);
+    let crossCount = Math.round(operationCount * this._crossoverRate);
+    /* istanbul ignore next */
+    crossCount = crossCount % 2 == 0 ? crossCount : crossCount - 1;
+    let plebCount = operationCount - crossCount;
 
-		console.log({ elitistCount, freshCount, operationCount, crossCount, plebCount });
+    console.log({
+      elitistCount,
+      freshCount,
+      operationCount,
+      crossCount,
+      plebCount
+    });
 
-		let totalChromosomes = [];
-		let elitistChromosomes = [];
-		let freshChromosomes = [];
-		let crossedChromosomes = [];
-		let plebChromosomes = [];
+    let totalChromosomes = [];
+    let elitistChromosomes = [];
+    let freshChromosomes = [];
+    let crossedChromosomes = [];
+    let plebChromosomes = [];
 
-    for(let i = 0; i < elitistCount; i++) {
+    for (let i = 0; i < elitistCount; i++) {
       elitistChromosomes.push(this._population.chromosomes[i]);
     }
 
@@ -73,7 +93,22 @@ export default class Darwin {
 
     console.log(freshChromosomes);
 
-    // const toBeCrossed = this._se
+    const toBeCrossed = this._selection.apply(this, [
+      this._population.chromosomes,
+      crossCount
+    ]);
+
+    for (let i = 0; i < toBeCrossed.length; i += 2) {
+      let children = this._crossover.apply(this, [toBeCrossed[i].duplicate(), toBeCrossed[i + 1].duplicate()]);
+      crossedChromosomes.push(children[0]);
+      crossedChromosomes.push(children[1]);
+    }
+
+    plebChromosomes = this._selection.apply(this, [this._population.chromosomes, plebCount]);
+
+    totalChromosomes = [...elitistChromosomes, ...freshChromosomes, ...crossedChromosomes, ...plebChromosomes];
+
+    this._population = new Population(totalChromosomes.length, totalChromosomes);
 
     return this;
   }
@@ -81,11 +116,11 @@ export default class Darwin {
   setFitness(scores: number[] | number, index: number = 0) {
     this._population.setFitness(scores, index);
   }
-  
+
   topChromosome(): TopChromosomeObject {
     return this._population.topChromosome();
   }
-  
+
   lowestChromosome(): TopChromosomeObject {
     return this._population.lowestChromosome();
   }
@@ -136,7 +171,7 @@ interface ConstructorOptions {
 }
 
 interface TopChromosomeObject {
-  index: number,
-  fitness: number,
-  chromosome: GenericChromosome<any>
+  index: number;
+  fitness: number;
+  chromosome: GenericChromosome<any>;
 }

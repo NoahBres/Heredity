@@ -3,7 +3,7 @@ export default class GenericChromosome<T> {
   protected _genes: T[];
   protected _length: number = 0;
 
-  constructor(length: number = 0, genes: T[] = [], score: number = 0) {
+  constructor(length: number, genes: T[] = [], score: number = 0) {
     this._length = length;
     this._genes = genes;
     this._fitness = score;

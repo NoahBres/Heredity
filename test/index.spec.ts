@@ -31,7 +31,7 @@ describe("Darwin", () => {
   test("Get lowest chromosome", () => {
     d.generatePopulation();
     d.setFitness(250, 3);
-    d.setFitness([6, 10, 50, 5, 99])
+    d.setFitness([6, 10, 50, 5, 99]);
     expect(d.lowestChromosome().index).toBe(3);
   });
 
@@ -53,11 +53,12 @@ describe("Darwin", () => {
       templateChromosome: new NumberChromosome({}, 5)
     });
     d.generatePopulation();
-    d.setFitness(new Array(50).fill(1).map(() => Math.floor(Math.random() * 500)));
+    d.setFitness(
+      new Array(50).fill(1).map(() => Math.floor(Math.random() * 500))
+    );
     const p = d.population.duplicate();
     d.nextGeneration();
 
     expect(d.getGenesFlat()).not.toStrictEqual(p.getGenesFlat());
   });
 });
-
