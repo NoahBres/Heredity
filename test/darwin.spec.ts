@@ -1,4 +1,5 @@
-import Darwin from "../src/index";
+// import Darwin from "../src/darwin";
+import Darwin from '../src/index';
 import { GenericChromosome, NumberChromosome } from "../src/chromosomes";
 import Population from "../src/population";
 

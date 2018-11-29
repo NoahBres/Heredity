@@ -1,5 +1,5 @@
 {
-  "name": "darwin.js",
+  "name": "darwinjs",
   "version": "1.0.0",
   "description": "A genetic algorithm library",
   "main": "dist/index.js",
