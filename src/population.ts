@@ -7,8 +7,8 @@ export default class Population {
   constructor(size: number, chromosomes: GenericChromosome<any>[] = []) {
     this._chromosomes = chromosomes;
     this._size = size;
-    
-    if(this._chromosomes.length == 0)
+
+    if (this._chromosomes.length == 0)
       this._chromosomes = new Array(this._size);
   }
 
@@ -17,7 +17,7 @@ export default class Population {
 
     for (let i = 0; i < this._size; i++) {
       let c = templateChromosome.duplicate().generate();
-    
+
       this._chromosomes.push(c);
     }
 
@@ -32,16 +32,16 @@ export default class Population {
     let top = this._chromosomes[0].fitness;
 
     let index = 0;
-    for(let i = 0; i < this._chromosomes.length; i++) {
+    for (let i = 0; i < this._chromosomes.length; i++) {
       let val = this._chromosomes[i].fitness;
 
-      if(val > top) {
+      if (val > top) {
         index = i;
         top = val;
       }
 
     }
-    
+
     return {
       index: index,
       fitness: this._chromosomes[index].fitness,
@@ -50,22 +50,22 @@ export default class Population {
   }
 
   lowestChromosome(): TopChromosomeObject {
-		let low = this._chromosomes[0].fitness;
-		
-		let index = 0;
-		for(let i = 0; i < this._chromosomes.length; i++) {
-			let val = this._chromosomes[i].fitness;
+    let low = this._chromosomes[0].fitness;
 
-			if(val < low) {
-				index = i;
-				low = val;
-			}
-		}
+    let index = 0;
+    for (let i = 0; i < this._chromosomes.length; i++) {
+      let val = this._chromosomes[i].fitness;
 
-		return {
-			index: index,
-			fitness: this._chromosomes[index].fitness,
-			chromosome: this._chromosomes[index]
+      if (val < low) {
+        index = i;
+        low = val;
+      }
+    }
+
+    return {
+      index: index,
+      fitness: this._chromosomes[index].fitness,
+      chromosome: this._chromosomes[index]
     }
   }
 
@@ -75,7 +75,7 @@ export default class Population {
   }
 
   setFitness(scores: number[] | number, index = 0) {
-    if(scores instanceof Array)
+    if (scores instanceof Array)
       this._chromosomes.forEach((val, index) => val.fitness = scores[index]);
     else
       this._chromosomes[index].fitness = scores;
@@ -83,7 +83,7 @@ export default class Population {
 
   getGenes(): any[] {
     let data: any[] = [];
-    for(const chromosome of this._chromosomes) {
+    for (const chromosome of this._chromosomes) {
       data.push(chromosome.genes);
     }
 
@@ -92,7 +92,7 @@ export default class Population {
 
   getGenesFlat(): any[] {
     let data: any[] = [];
-    for(const chromosome of this._chromosomes) {
+    for (const chromosome of this._chromosomes) {
       data = [...data, ...chromosome.genes];
     }
 

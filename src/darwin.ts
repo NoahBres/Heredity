@@ -155,6 +155,10 @@ export default class Darwin {
   get chromosomes(): GenericChromosome<any>[] {
     return this._population.chromosomes;
   }
+
+  get history(): Population[] {
+    return this._history;
+  }
 }
 
 interface ConstructorOptions {
