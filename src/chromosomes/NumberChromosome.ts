@@ -1,4 +1,4 @@
-import GenericChromosome from "./generic_chromosome";
+import GenericChromosome from "./GenericChromosome";
 
 export default class NumberChromosome extends GenericChromosome<number> {
   private _upperBound: number;
@@ -24,11 +24,12 @@ export default class NumberChromosome extends GenericChromosome<number> {
     this._round = round;
     this._clamp = clamp;
 
-    if (this._lowerBound > this._upperBound)
+    if (this._lowerBound > this._upperBound) {
       [this._lowerBound, this._upperBound] = [
         this._upperBound,
         this._lowerBound
       ];
+    }
   }
 
   generate(): NumberChromosome {

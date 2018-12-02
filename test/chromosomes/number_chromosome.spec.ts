@@ -1,4 +1,4 @@
-import { NumberChromosome } from '../../src/chromosomes'
+import { NumberChromosome } from "../../src/chromosomes";
 
 describe("Number Chromosome", () => {
   let chrom1: NumberChromosome;
@@ -6,19 +6,25 @@ describe("Number Chromosome", () => {
   let chrom3: NumberChromosome;
 
   beforeEach(() => {
-    chrom1 = new NumberChromosome({
-      lowerBound: 5,
-      upperBound: 0,
-      round: false,
-      clamp: false
-    }, 5);
-    
-    chrom2 = new NumberChromosome({
-      lowerBound: 0,
-      upperBound: 5,
-      round: true,
-      clamp: false
-    }, 5);
+    chrom1 = new NumberChromosome(
+      {
+        lowerBound: 5,
+        upperBound: 0,
+        round: false,
+        clamp: false
+      },
+      5
+    );
+
+    chrom2 = new NumberChromosome(
+      {
+        lowerBound: 0,
+        upperBound: 5,
+        round: true,
+        clamp: false
+      },
+      5
+    );
 
     chrom3 = new NumberChromosome({}, 5);
   });
@@ -48,26 +54,26 @@ describe("Number Chromosome", () => {
     chrom2.generate();
     chrom3.generate();
 
-    for(let gene of chrom1.genes) {
-      expect(gene).toBeGreaterThanOrEqual(0);
-      expect(gene).toBeLessThanOrEqual(5);
-    }
-    
-    for(let gene of chrom2.genes) {
+    for (const gene of chrom1.genes) {
       expect(gene).toBeGreaterThanOrEqual(0);
       expect(gene).toBeLessThanOrEqual(5);
     }
 
-    for(let gene of chrom3.genes) {
+    for (const gene of chrom2.genes) {
+      expect(gene).toBeGreaterThanOrEqual(0);
+      expect(gene).toBeLessThanOrEqual(5);
+    }
+
+    for (const gene of chrom3.genes) {
       expect(gene).toBeGreaterThanOrEqual(0);
       expect(gene).toBeLessThanOrEqual(1);
     }
   });
-  
+
   test("Chromosome is rounded", () => {
     chrom2.generate();
 
-    for(let gene of chrom2.genes) {
+    for (const gene of chrom2.genes) {
       expect(gene % 1 === 0).toBeTruthy();
     }
   });

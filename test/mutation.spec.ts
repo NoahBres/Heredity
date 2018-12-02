@@ -1,6 +1,6 @@
-import Population from "../src/population";
+import Population from "../src/Population";
 import { NumberChromosome, BitChromosome } from "../src/chromosomes";
-import { AdditionMutate, BitFlipMutate } from "../src/mutations";
+import { additionMutate, bitFlipMutate } from "../src/mutations";
 
 describe("Mutation functions", () => {
   let pop: Population;
@@ -9,8 +9,8 @@ describe("Mutation functions", () => {
     pop = new Population(5);
     pop.generate(new NumberChromosome({}, 5));
 
-    let chromosomes = [...pop.chromosomes];
-    let mutated = AdditionMutate(chromosomes, 0.2, {});
+    const chromosomes = [...pop.chromosomes];
+    const mutated = additionMutate(chromosomes, 0.2, {});
     expect(mutated).not.toEqual(chromosomes);
   });
 
@@ -18,8 +18,8 @@ describe("Mutation functions", () => {
     pop = new Population(5);
     pop.generate(new BitChromosome(5));
 
-    let chromosomes = [...pop.chromosomes];
-    let mutated = BitFlipMutate(chromosomes, 0.2, {})
+    const chromosomes = [...pop.chromosomes];
+    const mutated = bitFlipMutate(chromosomes, 0.2, {});
     expect(mutated).not.toEqual(chromosomes);
-  })
-})
+  });
+});

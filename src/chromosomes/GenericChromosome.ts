@@ -8,8 +8,9 @@ export default class GenericChromosome<T> {
     this._genes = genes;
     this._fitness = score;
 
-    if(this._genes.length == 0)
-      this._genes = new Array(length);
+    if (this._genes.length === 0) {
+      this._genes = Array(length);
+    }
   }
 
   duplicate(): GenericChromosome<T> {
@@ -17,10 +18,7 @@ export default class GenericChromosome<T> {
   }
 
   generate(): GenericChromosome<T> {
-    this._genes = new Array(this._length);
-    // for(let i = 0; i < this._length; i++) {
-    //   this._genes.push(0);
-    // }
+    this._genes = Array(this._length);
 
     return this;
   }
@@ -45,4 +43,3 @@ export default class GenericChromosome<T> {
     return this._genes.length;
   }
 }
-

@@ -23,7 +23,7 @@ describe("Generic Chromosome", () => {
   test("Generate chromosome", () => {
     chrom.generate();
 
-    expect(chrom.genes).toEqual(new Array(5));
+    expect(chrom.genes).toEqual(Array(5));
   });
 
   test("Get and set fitness", () => {

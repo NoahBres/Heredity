@@ -1,5 +1,5 @@
-import Population from "../src/population";
-import { NumberChromosome } from "../src/chromosomes"
+import Population from "../src/Population";
+import { NumberChromosome } from "../src/chromosomes";
 
 describe("Population", () => {
   let pop: Population;
@@ -36,7 +36,7 @@ describe("Population", () => {
 
   test("Get lowest chromosome", () => {
     pop.generate(new NumberChromosome({}, 5));
-    pop.setFitness([6, 10, 50, 5, 99])
+    pop.setFitness([6, 10, 50, 5, 99]);
     expect(pop.lowestChromosome().index).toBe(3);
   });
 

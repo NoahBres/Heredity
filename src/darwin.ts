@@ -1,14 +1,13 @@
 import { GenericChromosome } from "./chromosomes";
-import Population from "./population";
-import { RankSelect } from "./selections";
-import { UniformCross } from "./crossovers";
-import { NoMutate } from "./mutations";
+import Population from "./Population";
+import { rankSelect } from "./selections";
+import { uniformCross } from "./crossovers";
+import { noMutate } from "./mutations";
 
 export default class Darwin {
   private _populationSize: number;
   private _templateChromosome: GenericChromosome<any>;
   private _mutationRate: number;
-  // private _mutationRange: number;
   private _crossoverRate: number;
   private _elitism: number;
   private _newChromosomes: number;
@@ -23,7 +22,11 @@ export default class Darwin {
     parent1: GenericChromosome<any>,
     parent2: GenericChromosome<any>
   ) => GenericChromosome<any>[];
-  private _mutation: (chromosomes: GenericChromosome<number>[], chance: number, mutationRange: number) => GenericChromosome<any>[]
+  private _mutation: (
+    chromosomes: GenericChromosome<number>[],
+    chance: number,
+    mutationRange: number
+  ) => GenericChromosome<any>[];
 
   private _history: Population[] = [];
 
@@ -40,9 +43,9 @@ export default class Darwin {
 
     mutationOptions = {},
 
-    selection = RankSelect,
-    crossover = UniformCross,
-    mutation = NoMutate,
+    selection = rankSelect,
+    crossover = uniformCross,
+    mutation = noMutate
   }: ConstructorOptions) {
     this._populationSize = populationSize;
     this._templateChromosome = templateChromosome;
@@ -70,37 +73,27 @@ export default class Darwin {
     this._history.push(this._population.duplicate());
     this._population.sort();
 
-    let elitistCount = Math.floor(this._elitism * this._population.size);
-    let freshCount = Math.floor(this._newChromosomes * this._population.size);
-    let operationCount = this._population.size - (elitistCount + freshCount);
+    const elitistCount = Math.floor(this._elitism * this._population.size);
+    const freshCount = Math.floor(this._newChromosomes * this._population.size);
+    const operationCount = this._population.size - (elitistCount + freshCount);
     let crossCount = Math.round(operationCount * this._crossoverRate);
     /* istanbul ignore next */
-    crossCount = crossCount % 2 == 0 ? crossCount : crossCount - 1;
-    let plebCount = operationCount - crossCount;
-
-    // console.log({
-    //   elitistCount,
-    //   freshCount,
-    //   operationCount,
-    //   crossCount,
-    //   plebCount
-    // });
+    crossCount = crossCount % 2 === 0 ? crossCount : crossCount - 1;
+    const plebCount = operationCount - crossCount;
 
     let totalChromosomes = [];
-    let elitistChromosomes = [];
     let freshChromosomes = [];
-    let crossedChromosomes = [];
     let plebChromosomes = [];
+    const elitistChromosomes = [];
+    const crossedChromosomes = [];
 
     for (let i = 0; i < elitistCount; i++) {
       elitistChromosomes.push(this._population.chromosomes[i]);
     }
 
-    let fresh = new Population(freshCount);
+    const fresh = new Population(freshCount);
     fresh.generate(this._templateChromosome.duplicate());
     freshChromosomes = fresh.chromosomes;
-
-    // console.log(freshChromosomes);
 
     const toBeCrossed = this._selection.apply(this, [
       this._population.chromosomes,
@@ -108,18 +101,36 @@ export default class Darwin {
     ]);
 
     for (let i = 0; i < toBeCrossed.length; i += 2) {
-      let children = this._crossover.apply(this, [toBeCrossed[i].duplicate(), toBeCrossed[i + 1].duplicate()]);
+      const children = this._crossover.apply(this, [
+        toBeCrossed[i].duplicate(),
+        toBeCrossed[i + 1].duplicate()
+      ]);
       crossedChromosomes.push(children[0]);
       crossedChromosomes.push(children[1]);
     }
 
-    plebChromosomes = this._selection.apply(this, [this._population.chromosomes, plebCount]);
+    plebChromosomes = this._selection.apply(this, [
+      this._population.chromosomes,
+      plebCount
+    ]);
 
-    totalChromosomes = [...elitistChromosomes, ...freshChromosomes, ...crossedChromosomes, ...plebChromosomes];
+    totalChromosomes = [
+      ...elitistChromosomes,
+      ...freshChromosomes,
+      ...crossedChromosomes,
+      ...plebChromosomes
+    ];
 
-    totalChromosomes = this._mutation.apply(this, [totalChromosomes, this._mutationRate, this._mutationOptions]);
+    totalChromosomes = this._mutation.apply(this, [
+      totalChromosomes,
+      this._mutationRate,
+      this._mutationOptions
+    ]);
 
-    this._population = new Population(totalChromosomes.length, totalChromosomes);
+    this._population = new Population(
+      totalChromosomes.length,
+      totalChromosomes
+    );
 
     return this;
   }
@@ -165,7 +176,6 @@ interface ConstructorOptions {
   populationSize: number;
   templateChromosome: GenericChromosome<any>;
   mutationRate?: number;
-  // mutationRange?: number;
   crossoverRate?: number;
   elitism?: number;
   newChromosomes?: number;

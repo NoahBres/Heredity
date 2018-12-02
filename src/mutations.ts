@@ -1,16 +1,20 @@
-import GenericChromosome from "./chromosomes/generic_chromosome";
+import GenericChromosome from "./chromosomes/GenericChromosome";
 
-export function BitFlipMutate(chromosomes: GenericChromosome<boolean>[], chance: number, options: any): GenericChromosome<boolean>[] {
-  let chromes: GenericChromosome<boolean>[] = [];
+export function bitFlipMutate(
+  chromosomes: GenericChromosome<boolean>[],
+  chance: number,
+  options: any
+): GenericChromosome<boolean>[] {
+  const chromes: GenericChromosome<boolean>[] = [];
 
-  for(let i = 0; i < chromosomes.length; i++) {
-    let chrome = chromosomes[i].duplicate();
+  for (let i = 0; i < chromosomes.length; i++) {
+    const chrome = chromosomes[i].duplicate();
 
-    for(let j = 0; j < chromosomes[i].genes.length; j++) {
-      let rand = Math.random();
+    for (let j = 0; j < chromosomes[i].genes.length; j++) {
+      const rand = Math.random();
 
-      if(rand <= chance) {
-        let genes = [...chrome.genes];
+      if (rand <= chance) {
+        const genes = [...chrome.genes];
         genes[j] = !genes[j];
 
         chrome.genes = genes;
@@ -23,20 +27,24 @@ export function BitFlipMutate(chromosomes: GenericChromosome<boolean>[], chance:
   return chromes;
 }
 
-export function AdditionMutate(chromosomes: GenericChromosome<number>[], chance: number, options: any): GenericChromosome<number>[] {
-  let mutationRange = options.mutationRange || 0.5;
+export function additionMutate(
+  chromosomes: GenericChromosome<number>[],
+  chance: number,
+  options: any
+): GenericChromosome<number>[] {
+  const mutationRange = options.mutationRange || 0.5;
 
-  let chromes: GenericChromosome<number>[] = [];
+  const chromes: GenericChromosome<number>[] = [];
 
-  for(let i = 0; i < chromosomes.length; i++) {
-    let chrome = chromosomes[i].duplicate();
+  for (let i = 0; i < chromosomes.length; i++) {
+    const chrome = chromosomes[i].duplicate();
 
-    for(let j = 0; j < chromosomes[i].genes.length; j++) {
-      let rand = Math.random();
+    for (let j = 0; j < chromosomes[i].genes.length; j++) {
+      const rand = Math.random();
 
-      if(rand <= chance) {
-        let genes = [...chrome.genes];
-        let randPlus = Math.random() * mutationRange * 2 - mutationRange;
+      if (rand <= chance) {
+        const genes = [...chrome.genes];
+        const randPlus = Math.random() * mutationRange * 2 - mutationRange;
 
         genes[j] = genes[j] + randPlus;
 
@@ -50,6 +58,10 @@ export function AdditionMutate(chromosomes: GenericChromosome<number>[], chance:
   return chromes;
 }
 
-export function NoMutate(chromosomes: GenericChromosome<any>[], chance: number, options: any): GenericChromosome<any>[] {
+export function noMutate(
+  chromosomes: GenericChromosome<any>[],
+  chance: number,
+  options: any
+): GenericChromosome<any>[] {
   return chromosomes;
 }

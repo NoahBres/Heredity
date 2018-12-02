@@ -1,7 +1,6 @@
-// import Darwin from "../src/darwin";
-import Darwin from '../src/index';
+import { Darwin } from "../src/index";
 import { GenericChromosome, NumberChromosome } from "../src/chromosomes";
-import Population from "../src/population";
+import Population from "../src/Population";
 
 describe("Darwin", () => {
   let d: Darwin;
@@ -36,6 +35,10 @@ describe("Darwin", () => {
     expect(d.lowestChromosome().index).toBe(3);
   });
 
+  test("Get history", () => {
+    expect(d.history.length).toBe(0);
+  });
+
   test("Set fitness", () => {
     d.generatePopulation();
     d.setFitness([5, 10, 50, 6, 99]);
@@ -43,7 +46,7 @@ describe("Darwin", () => {
   });
 
   test("Set population", () => {
-    let p = new Population(6);
+    const p = new Population(6);
     d.population = p;
     expect(p).toStrictEqual(d.population);
   });
@@ -55,7 +58,9 @@ describe("Darwin", () => {
     });
     d.generatePopulation();
     d.setFitness(
-      new Array(50).fill(1).map(() => Math.floor(Math.random() * 500))
+      Array(50)
+        .fill(1)
+        .map(() => Math.floor(Math.random() * 500))
     );
     const p = d.population.duplicate();
     d.nextGeneration();

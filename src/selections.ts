@@ -1,12 +1,12 @@
-import GenericChromosome from "./chromosomes/generic_chromosome";
+import GenericChromosome from "./chromosomes/GenericChromosome";
 
-export function RouletteWheelSelect(
+export function rouletteWheelSelect(
   chromosomes: GenericChromosome<any>[],
   num: number
 ): GenericChromosome<any>[] {
-  let selections = [];
+  const selections = [];
 
-  let totalFitness = chromosomes.reduce((acc, curr) => acc + curr.fitness, 0);
+  const totalFitness = chromosomes.reduce((acc, curr) => acc + curr.fitness, 0);
 
   while (selections.length < num) {
     // let value = Math.random() * totalFitness;
@@ -17,7 +17,7 @@ export function RouletteWheelSelect(
     //     selections.push(chromosomes[j].duplicate());
     //   }
     // }
-    let goal = Math.random() * totalFitness;
+    const goal = Math.random() * totalFitness;
 
     let sum = 0;
     for (let j = 0; j < chromosomes.length; j++) {
@@ -33,16 +33,16 @@ export function RouletteWheelSelect(
   return selections;
 }
 
-export function RankSelect(
+export function rankSelect(
   chromosomes: GenericChromosome<any>[],
   num: number
 ): GenericChromosome<any>[] {
-  let selections = [];
+  const selections = [];
 
-  let totalRank = chromosomes.reduce((acc, curr, currI) => acc + currI, 0);
+  const totalRank = chromosomes.reduce((acc, curr, currI) => acc + currI, 0);
 
   while (selections.length < num) {
-    let goal = Math.random() * totalRank;
+    const goal = Math.random() * totalRank;
 
     let sum = 0;
     for (let j = 0; j < chromosomes.length; j++) {
@@ -59,11 +59,11 @@ export function RankSelect(
   return selections;
 }
 
-export function TopSelect(
+export function topSelect(
   chromosomes: GenericChromosome<any>[],
   num: number
 ): GenericChromosome<any>[] {
-  let selections = [];
+  const selections = [];
 
   for (let i = 0; i < num; i++) {
     selections.push(chromosomes[i].duplicate());
@@ -72,14 +72,14 @@ export function TopSelect(
   return selections;
 }
 
-export function RandomSelect(
+export function randomSelect(
   chromosomes: GenericChromosome<any>[],
   num: number
 ): GenericChromosome<any>[] {
-  let selections = [];
+  const selections = [];
 
   for (let i = 0; i < num; i++) {
-    let random = Math.floor(Math.random() * chromosomes.length);
+    const random = Math.floor(Math.random() * chromosomes.length);
     selections.push(chromosomes[random].duplicate());
   }
 

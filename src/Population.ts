@@ -8,15 +8,16 @@ export default class Population {
     this._chromosomes = chromosomes;
     this._size = size;
 
-    if (this._chromosomes.length == 0)
-      this._chromosomes = new Array(this._size);
+    if (this._chromosomes.length === 0) {
+      this._chromosomes = Array(this._size);
+    }
   }
 
   generate(templateChromosome: GenericChromosome<any>): Population {
     this._chromosomes = [];
 
     for (let i = 0; i < this._size; i++) {
-      let c = templateChromosome.duplicate().generate();
+      const c = templateChromosome.duplicate().generate();
 
       this._chromosomes.push(c);
     }
@@ -33,20 +34,19 @@ export default class Population {
 
     let index = 0;
     for (let i = 0; i < this._chromosomes.length; i++) {
-      let val = this._chromosomes[i].fitness;
+      const val = this._chromosomes[i].fitness;
 
       if (val > top) {
         index = i;
         top = val;
       }
-
     }
 
     return {
-      index: index,
+      index,
       fitness: this._chromosomes[index].fitness,
       chromosome: this._chromosomes[index]
-    }
+    };
   }
 
   lowestChromosome(): TopChromosomeObject {
@@ -54,7 +54,7 @@ export default class Population {
 
     let index = 0;
     for (let i = 0; i < this._chromosomes.length; i++) {
-      let val = this._chromosomes[i].fitness;
+      const val = this._chromosomes[i].fitness;
 
       if (val < low) {
         index = i;
@@ -63,10 +63,10 @@ export default class Population {
     }
 
     return {
-      index: index,
+      index,
       fitness: this._chromosomes[index].fitness,
       chromosome: this._chromosomes[index]
-    }
+    };
   }
 
   sort() {
@@ -75,28 +75,19 @@ export default class Population {
   }
 
   setFitness(scores: number[] | number, index = 0) {
-    if (scores instanceof Array)
-      this._chromosomes.forEach((val, index) => val.fitness = scores[index]);
-    else
-      this._chromosomes[index].fitness = scores;
+    if (scores instanceof Array) {
+      this._chromosomes.forEach((val, index) => (val.fitness = scores[index]));
+    } else this._chromosomes[index].fitness = scores;
   }
 
   getGenes(): any[] {
-    let data: any[] = [];
-    for (const chromosome of this._chromosomes) {
-      data.push(chromosome.genes);
-    }
-
-    return data;
+    return this._chromosomes.map(x => x.genes);
   }
 
   getGenesFlat(): any[] {
-    let data: any[] = [];
-    for (const chromosome of this._chromosomes) {
-      data = [...data, ...chromosome.genes];
-    }
-
-    return data;
+    return this._chromosomes
+      .map(x => x.genes)
+      .reduce((acc, val) => acc.concat(val), []);
   }
 
   get chromosomes(): GenericChromosome<any>[] {
@@ -109,7 +100,7 @@ export default class Population {
 }
 
 interface TopChromosomeObject {
-  index: number,
-  fitness: number,
-  chromosome: GenericChromosome<any>
+  index: number;
+  fitness: number;
+  chromosome: GenericChromosome<any>;
 }

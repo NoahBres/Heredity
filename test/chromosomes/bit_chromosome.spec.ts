@@ -19,7 +19,7 @@ describe("Generic Chromosome", () => {
   test("Generate chromosome", () => {
     chrom.generate();
 
-    for(let gene of chrom.genes) {
+    for (const gene of chrom.genes) {
       expect(typeof gene).toBe("boolean");
     }
   });
