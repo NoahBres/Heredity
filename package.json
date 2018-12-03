@@ -1,5 +1,5 @@
 {
-  "name": "darwin.js",
+  "name": "heredity",
   "version": "1.0.0",
   "description": "A genetic algorithm library",
   "main": "dist/index.js",
@@ -37,20 +37,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NoahBres/Darwin.js.git"
+    "url": "git+https://github.com/NoahBres/Heredity.git"
   },
   "keywords": [
     "genetic algorithm",
     "genetic",
     "typescript",
-    "darwin"
+    "heredity"
   ],
   "author": "Noah Bresler <noahbres@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/NoahBres/Darwin.js/issues"
+    "url": "https://github.com/NoahBres/Heredity/issues"
   },
-  "homepage": "https://github.com/NoahBres/Darwin.js#readme",
+  "homepage": "https://github.com/NoahBres/Heredity#readme",
   "devDependencies": {
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.9",

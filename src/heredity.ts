@@ -4,7 +4,7 @@ import { rankSelect } from "./selections";
 import { uniformCross } from "./crossovers";
 import { noMutate } from "./mutations";
 
-export default class Darwin {
+export default class Heredity {
   private _populationSize: number;
   private _templateChromosome: GenericChromosome<any>;
   private _mutationRate: number;
@@ -63,13 +63,13 @@ export default class Darwin {
     this._mutation = mutation;
   }
 
-  generatePopulation(): Darwin {
+  generatePopulation(): Heredity {
     this._population.generate(this._templateChromosome.duplicate());
 
     return this;
   }
 
-  nextGeneration(): Darwin {
+  nextGeneration(): Heredity {
     this._history.push(this._population.duplicate());
     this._population.sort();
 

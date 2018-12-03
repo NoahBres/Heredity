@@ -1,2 +1,2 @@
-export { default as Darwin } from "./darwin";
+export { default as Heredity } from "./heredity";
 export * from "./chromosomes";

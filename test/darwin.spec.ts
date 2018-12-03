@@ -1,19 +1,19 @@
-import { Darwin } from "../src/index";
+import { Heredity } from "../src/index";
 import { GenericChromosome, NumberChromosome } from "../src/chromosomes";
 import Population from "../src/Population";
 
-describe("Darwin", () => {
-  let d: Darwin;
+describe("Heredity", () => {
+  let d: Heredity;
 
   beforeEach(() => {
-    d = new Darwin({
+    d = new Heredity({
       populationSize: 5,
       templateChromosome: new NumberChromosome({}, 5)
     });
   });
 
-  test("Check if Darwin is initiated", () => {
-    expect(d).toBeInstanceOf(Darwin);
+  test("Check if Heredity is initiated", () => {
+    expect(d).toBeInstanceOf(Heredity);
   });
 
   test("Check if population is initiated correctly", () => {
@@ -52,7 +52,7 @@ describe("Darwin", () => {
   });
 
   test("Next generation", () => {
-    d = new Darwin({
+    d = new Heredity({
       populationSize: 50,
       templateChromosome: new NumberChromosome({}, 5)
     });
