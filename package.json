@@ -40,10 +40,12 @@
     "url": "git+https://github.com/NoahBres/Heredity.git"
   },
   "keywords": [
+    "heredity",
     "genetic algorithm",
     "genetic",
     "typescript",
-    "heredity"
+    "evolutionary algorithm",
+    "evolution"
   ],
   "author": "Noah Bresler <noahbres@gmail.com>",
   "license": "ISC",
