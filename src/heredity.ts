@@ -10,6 +10,7 @@ export default class Heredity {
   private _mutationRate: number;
   private _crossoverRate: number;
   private _elitism: number;
+  private _elitismTop: number;
   private _newChromosomes: number;
 
   private _mutationOptions: {};
@@ -39,6 +40,7 @@ export default class Heredity {
     // mutationRange = 0.5,
     crossoverRate = 0.9,
     elitism = 0.1,
+    elitismTop = 0.5,
     newChromosomes = 0.1,
 
     mutationOptions = {},
@@ -50,9 +52,9 @@ export default class Heredity {
     this._populationSize = populationSize;
     this._templateChromosome = templateChromosome;
     this._mutationRate = mutationRate;
-    // this._mutationRange = mutationRange;
     this._crossoverRate = crossoverRate;
     this._elitism = elitism;
+    this._elitismTop = elitismTop;
     this._newChromosomes = newChromosomes;
 
     this._mutationOptions = mutationOptions;
@@ -74,6 +76,7 @@ export default class Heredity {
     this._population.sort();
 
     const elitistCount = Math.floor(this._elitism * this._population.size);
+    const elitistTopCount = Math.floor(elitistCount * this._elitismTop);
     const freshCount = Math.floor(this._newChromosomes * this._population.size);
     const operationCount = this._population.size - (elitistCount + freshCount);
     let crossCount = Math.round(operationCount * this._crossoverRate);
@@ -87,8 +90,10 @@ export default class Heredity {
     const elitistChromosomes = [];
     const crossedChromosomes = [];
 
+    let elitistTopCurr = 0;
     for (let i = 0; i < elitistCount; i++) {
-      elitistChromosomes.push(this._population.chromosomes[i]);
+      const pos = elitistTopCurr++ > elitistTopCount? 0 : i;
+      elitistChromosomes.push(this._population.chromosomes[pos]);
     }
 
     const fresh = new Population(freshCount);
@@ -178,6 +183,7 @@ interface ConstructorOptions {
   mutationRate?: number;
   crossoverRate?: number;
   elitism?: number;
+  elitismTop?: number;
   newChromosomes?: number;
 
   mutationOptions?: any;
