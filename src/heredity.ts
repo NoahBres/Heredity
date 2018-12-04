@@ -37,7 +37,6 @@ export default class Heredity {
     populationSize,
     templateChromosome,
     mutationRate = 0.2,
-    // mutationRange = 0.5,
     crossoverRate = 0.9,
     elitism = 0.1,
     elitismTop = 0.5,
@@ -92,7 +91,7 @@ export default class Heredity {
 
     let elitistTopCurr = 0;
     for (let i = 0; i < elitistCount; i++) {
-      const pos = elitistTopCurr++ > elitistTopCount? 0 : i;
+      const pos = elitistTopCurr++ > elitistTopCount ? 0 : i;
       elitistChromosomes.push(this._population.chromosomes[pos]);
     }
 

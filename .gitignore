@@ -23,6 +23,7 @@ node_modules/
 # Build
 dist
 docs
+api
 bundle
 
 # Jest

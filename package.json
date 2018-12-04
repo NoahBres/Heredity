@@ -11,6 +11,7 @@
     "lint": "tslint --format stylish --project \"./tsconfig.json\"",
     "test": "jest --color --coverage --notify",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "api": "typedoc --out api/ src/",
     "prepare": "yarn build",
     "prepublishOnly": "yarn test && yarn lint",
     "preversion": "yarn lint",
@@ -22,8 +23,7 @@
       "^.+\\.tsx?$": "ts-jest"
     },
     "moduleDirectories": [
-      "node_modules",
-      "app"
+      "node_modules"
     ],
     "moduleFileExtensions": [
       "ts",
@@ -64,6 +64,7 @@
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.11.1",
     "tslint-config-prettier": "^1.17.0",
+    "typedoc": "^0.13.0",
     "typescript": "^3.1.6",
     "webpack": "^4.26.1",
     "webpack-cli": "^3.1.2"
