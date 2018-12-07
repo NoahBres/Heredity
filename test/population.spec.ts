@@ -1,5 +1,5 @@
 import Population from "../src/Population";
-import { NumberChromosome } from "../src/chromosomes";
+import NumberChromosome from "../src/chromosomes/NumberChromosome";
 
 describe("Population", () => {
   let pop: Population;

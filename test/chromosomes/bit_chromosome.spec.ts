@@ -1,4 +1,4 @@
-import { BitChromosome } from "../../src/chromosomes";
+import BitChromosome from "../../src/chromosomes/BitChromosome";
 
 describe("Generic Chromosome", () => {
   let chrom: BitChromosome;

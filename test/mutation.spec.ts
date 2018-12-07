@@ -1,5 +1,6 @@
 import Population from "../src/Population";
-import { NumberChromosome, BitChromosome } from "../src/chromosomes";
+import BitChromosome from "../src/chromosomes/BitChromosome";
+import NumberChromosome from "../src/chromosomes/NumberChromosome";
 import { additionMutate, bitFlipMutate } from "../src/mutations";
 
 describe("Mutation functions", () => {

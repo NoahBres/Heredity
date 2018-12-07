@@ -1,4 +1,4 @@
-import { NumberChromosome } from "../../src/chromosomes";
+import NumberChromosome from "../../src/chromosomes/NumberChromosome";
 
 describe("Number Chromosome", () => {
   let chrom1: NumberChromosome;

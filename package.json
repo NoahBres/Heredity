@@ -1,6 +1,6 @@
 {
   "name": "heredity",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A genetic algorithm library",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "lint": "tslint --format stylish --project \"./tsconfig.json\"",
     "test": "jest --color --coverage --notify",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "api": "typedoc --out api/ src/",
+    "api": "typedoc src/ --out api/ --theme minimal --name Heredity --mode modules --hideGenerator --exclude '**/*+(index).ts'",
     "prepare": "yarn build",
     "prepublishOnly": "yarn test && yarn lint",
     "preversion": "yarn lint",

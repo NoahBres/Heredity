@@ -1,1 +1,3 @@
 # Heredity
+
+## Usage and installation

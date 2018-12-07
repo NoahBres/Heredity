@@ -5,7 +5,7 @@ import {
   randomSelect
 } from "../src/selections";
 import Population from "../src/Population";
-import { NumberChromosome } from "../src/chromosomes";
+import NumberChromosome from "../src/chromosomes/NumberChromosome";
 
 describe("Selection suite", () => {
   let pop: Population;

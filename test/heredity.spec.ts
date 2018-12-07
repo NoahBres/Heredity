@@ -1,5 +1,6 @@
 import { Heredity } from "../src/index";
-import { GenericChromosome, NumberChromosome } from "../src/chromosomes";
+import NumberChromosome from "../src/chromosomes/NumberChromosome";
+import GenericChromosome from "../src/chromosomes/GenericChromosome";
 import Population from "../src/Population";
 
 describe("Heredity", () => {

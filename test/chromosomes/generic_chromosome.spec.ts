@@ -1,4 +1,4 @@
-import { GenericChromosome } from "../../src/chromosomes";
+import GenericChromosome from "../../src/chromosomes/GenericChromosome";
 
 describe("Generic Chromosome", () => {
   let chrom: GenericChromosome<number>;

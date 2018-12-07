@@ -1,5 +1,15 @@
 import GenericChromosome from "./chromosomes/GenericChromosome";
 
+/**
+ * #### Roulette Wheel Selection
+ * ([Explanation](https://en.wikipedia.org/wiki/Fitness_proportionate_selection))
+ *
+ * Selects a number of chromosomes based on proportion of their fitness to the total fitness of the overall population.
+ * Selection chance = (fitness / total fitness)
+ *
+ * @param chromosomes The array of chromosomes to select from
+ * @param num The number of chromosomes to select for
+ */
 export function rouletteWheelSelect(
   chromosomes: GenericChromosome<any>[],
   num: number
@@ -33,6 +43,16 @@ export function rouletteWheelSelect(
   return selections;
 }
 
+/**
+ * #### Rank Selection
+ * ([Explanation](https://courses.cs.washington.edu/courses/cse473/06sp/GeneticAlgDemo/selection.html))
+ *
+ * Selects a number of chromosomes based on their rank.
+ * Selection chance = ((total # of chromosomes - rank) / total # of chromosomes)
+ *
+ * @param chromosomes The array of chromosomes to select from
+ * @param num The number of chromosomes to select for
+ */
 export function rankSelect(
   chromosomes: GenericChromosome<any>[],
   num: number
@@ -59,6 +79,14 @@ export function rankSelect(
   return selections;
 }
 
+/**
+ * #### Top Select
+ *
+ * Selects the top chromosomes from the given chromosomes
+ *
+ * @param chromosomes The array of chromosomes to select from
+ * @param num The number of chromosomes to select for
+ */
 export function topSelect(
   chromosomes: GenericChromosome<any>[],
   num: number
@@ -72,6 +100,14 @@ export function topSelect(
   return selections;
 }
 
+/**
+ * #### Random Selection
+ *
+ * Randomly select a number of chromosomes
+ *
+ * @param chromosomes The array of chromosomes to select from
+ * @param num The number of chromosomes to select for
+ */
 export function randomSelect(
   chromosomes: GenericChromosome<any>[],
   num: number

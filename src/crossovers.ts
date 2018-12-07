@@ -1,5 +1,16 @@
 import GenericChromosome from "./chromosomes/GenericChromosome";
 
+/**
+ * #### Single point crossover
+ * ([Explanation](https://en.wikipedia.org/wiki/Crossover_(genetic_algorithm)#Single-point_crossover))
+ *
+ * Swaps the genes to the right of the point between the two parent chromosomes.
+ *
+ * @param parent1 Parent 1 of the crossover
+ * @param parent2 Parent 2 of the crossover
+ * @param index Index of the crossover
+ * @returns An array of two of the children chromosomes
+ */
 export function singlePoint(
   parent1: GenericChromosome<any>,
   parent2: GenericChromosome<any>,
@@ -22,6 +33,15 @@ export function singlePoint(
   return [child1, child2];
 }
 
+/**
+ * #### Single point cross
+ * Picks a random point in the two parent chromosomes to cross.
+ * Then passes it in to SinglePoint.
+ *
+ * @param parent1 Parent 1 of the crossover
+ * @param parent2 Parent 2 of the crossover
+ * @returns An array of two of the children chromosomes
+ */
 export function singlePointCross(
   parent1: GenericChromosome<any>,
   parent2: GenericChromosome<any>
@@ -33,6 +53,18 @@ export function singlePointCross(
   );
 }
 
+/**
+ * #### Two point crossover
+ * ([Explanation](https://en.wikipedia.org/wiki/Crossover_(genetic_algorithm)#Two-point_and_k-point_crossover))
+ *
+ * Swaps the bits between the two selected points.
+ *
+ * @param parent1 Parent 1 of the crossover
+ * @param parent2 Parent 2 of the crossover
+ * @param index1 Index of the crossover
+ * @param index2 Index 2 of the crossover
+ * @returns An array of two of the children chromosomes
+ */
 export function twoPoint(
   parent1: GenericChromosome<any>,
   parent2: GenericChromosome<any>,
@@ -63,6 +95,15 @@ export function twoPoint(
   return [child1, child2];
 }
 
+/**
+ * #### Two point cross
+ * Picks two random points in the two parent chromosomes to cross.
+ * Then passes it in to TwoPoint.
+ *
+ * @param parent1 Parent 1 of the crossover
+ * @param parent2 Parent 2 of the crossover
+ * @returns An array of two of the children chromosomes
+ */
 export function twoPointCross(
   parent1: GenericChromosome<any>,
   parent2: GenericChromosome<any>
@@ -75,6 +116,16 @@ export function twoPointCross(
   );
 }
 
+/**
+ * #### Uniform cross
+ * ([Explanation](https://en.wikipedia.org/wiki/Crossover_(genetic_algorithm)#Uniform_crossover))
+ *
+ * Goes down the chromosome and randomly switches gene values between the parents.
+ *
+ * @param parent1 Parent 1 of the crossover
+ * @param parent2 Parent 2 of the crossover
+ * @returns An array of two of the children chromosome
+ */
 export function uniformCross(
   parent1: GenericChromosome<any>,
   parent2: GenericChromosome<any>
@@ -99,6 +150,17 @@ export function uniformCross(
   return [child1, child2];
 }
 
+/**
+ * #### Arithmetic Blend
+ * (only works for NumberChromosome)
+ * ([Explanation](https://www.tutorialspoint.com/genetic_algorithms/genetic_algorithms_crossover.htm))
+ *
+ * Averages the value between genes and returns the children.
+ *
+ * @param parent1 Parent 1 of the crossover
+ * @param parent2 Parent 2 of the crossover
+ * @returns An array of two of the children chromosome
+ */
 export function arithmeticBlend(
   parent1: GenericChromosome<number>,
   parent2: GenericChromosome<number>
