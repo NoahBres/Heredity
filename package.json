@@ -1,12 +1,13 @@
 {
   "name": "heredity",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A genetic algorithm library",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "build:esm": "tsc -m es6 --outDir dist-esm",
     "bundle": "webpack",
     "lint": "tslint --format stylish --project \"./tsconfig.json\"",
     "test": "jest --color --coverage --notify",

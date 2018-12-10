@@ -22,6 +22,7 @@ node_modules/
 
 # Build
 dist
+dist-esm
 docs
 api
 bundle
