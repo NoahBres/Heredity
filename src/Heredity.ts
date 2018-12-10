@@ -107,6 +107,12 @@ export default class Heredity {
   /** Current population of chromosomes */
   private _population: Population;
 
+  private _genPopPreHook: HookObject[] = [];
+  private _genPopPostHook: HookObject[] = [];
+
+  private _nextGenPreHook: HookObject[] = [];
+  private _nextGenPostHook: HookObject[] = [];
+
   /**
    * Constructor options:
    * @example
@@ -165,7 +171,15 @@ export default class Heredity {
    * Will wipe the current population.
    */
   generatePopulation(): Heredity {
+    this._genPopPreHook.forEach(e => {
+      e.func.apply(e.thisVal, []);
+    });
+
     this._population.generate(this._templateChromosome.duplicate());
+
+    this._genPopPostHook.forEach(e => {
+      e.func.apply(e.thisVal, []);
+    });
 
     return this;
   }
@@ -176,6 +190,10 @@ export default class Heredity {
    * Past generation is pushed to history[] arraya\
    */
   nextGeneration(): Heredity {
+    this._nextGenPreHook.forEach(e => {
+      e.func.apply(e.thisVal, []);
+    });
+
     this._history.push(this._population.duplicate());
     this._population.sort();
 
@@ -241,7 +259,28 @@ export default class Heredity {
       totalChromosomes
     );
 
+    this._nextGenPostHook.forEach(e => {
+      e.func.apply(e.thisVal, []);
+    });
+
     return this;
+  }
+
+  addHook(type: string, thisVal: any, hook: () => void) {
+    switch (type) {
+      case "genPopPre":
+        this._genPopPreHook.push({ thisVal, func: hook });
+        break;
+      case "genPopPost":
+        this._genPopPostHook.push({ thisVal, func: hook });
+        break;
+      case "nextGenPre":
+        this._nextGenPreHook.push({ thisVal, func: hook });
+        break;
+      case "nextGenPost":
+        this._nextGenPostHook.push({ thisVal, func: hook });
+        break;
+    }
   }
 
   /**
@@ -374,4 +413,10 @@ interface TopChromosomeObject {
   index: number;
   fitness: number;
   chromosome: GenericChromosome<any>;
+}
+
+/** Type checking for pre/post hooks */
+interface HookObject {
+  thisVal: any;
+  func: () => void;
 }

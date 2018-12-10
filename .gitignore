@@ -23,9 +23,9 @@ node_modules/
 # Build
 dist
 dist-esm
+bundle
 docs
 api
-bundle
 
 # Jest
 coverage/

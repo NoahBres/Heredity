@@ -65,6 +65,10 @@ export default class GenericChromosome<T> {
     return this;
   }
 
+  getColorsHue(): number[] {
+    return [];
+  }
+
   get fitness(): number {
     return this._fitness;
   }

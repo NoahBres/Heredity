@@ -99,6 +99,24 @@ export default class NumberChromosome extends GenericChromosome<number> {
     return this;
   }
 
+  getColorsHue(): number[] {
+    const colors = this._genes.map(x => {
+      function map(
+        i: number,
+        inMin: number,
+        inMax: number,
+        outMin: number,
+        outMax: number
+      ): number {
+        return ((i - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+      }
+
+      return map(x, this._lowerBound, this._upperBound, 0, 255);
+    });
+
+    return colors;
+  }
+
   /** Returns a duplicated chromosome. */
   duplicate(): NumberChromosome {
     return new NumberChromosome(
