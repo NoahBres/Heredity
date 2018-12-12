@@ -28,7 +28,7 @@ export default class GenericChromosome<T> {
   /** Length of chromosome. Primarily used for generation. */
   protected _length: number = 0;
 
-  tags = new TagManager();
+  tags: TagManager = new TagManager(this);
 
   /**
    * @example
@@ -93,13 +93,20 @@ export default class GenericChromosome<T> {
 }
 
 class TagManager extends Set {
-  private _changeListeners: (() => void)[] = [];
+  private _changeListeners: ListenerObject[] = [];
+  private _chromosome: GenericChromosome<any>;
+
+  constructor(chromosome: GenericChromosome<any>) {
+    super();
+
+    this._chromosome = chromosome;
+  }
 
   add(value: any) {
     super.add(value);
 
     this._changeListeners.forEach(f => {
-      f.apply(f, []);
+      f.listener.apply(f.thisVal, [this._chromosome]);
     });
 
     return this;
@@ -109,19 +116,27 @@ class TagManager extends Set {
     super.clear();
 
     this._changeListeners.forEach(f => {
-      f.apply(f, []);
+      f.listener.apply(f.thisVal, [this._chromosome]);
     });
   }
 
   delete(value: any) {
     this._changeListeners.forEach(f => {
-      f.apply(f, []);
+      f.listener.apply(f.thisVal, [this._chromosome]);
     });
 
     return super.delete(value);
   }
 
-  onChange(listener: () => void) {
-    this._changeListeners.push(listener);
+  onChange(
+    thisVal: any,
+    listener: (chromosome: GenericChromosome<any>) => void
+  ) {
+    this._changeListeners.push({ thisVal, listener });
   }
+}
+
+interface ListenerObject {
+  thisVal: any;
+  listener: (chromosome: GenericChromosome<any>) => void;
 }

@@ -172,13 +172,13 @@ export default class Heredity {
    */
   generatePopulation(): Heredity {
     this._genPopPreHook.forEach(e => {
-      e.func.apply(e.thisVal, []);
+      e.fn.apply(e.thisVal, []);
     });
 
     this._population.generate(this._templateChromosome.duplicate());
 
     this._genPopPostHook.forEach(e => {
-      e.func.apply(e.thisVal, []);
+      e.fn.apply(e.thisVal, []);
     });
 
     return this;
@@ -191,7 +191,7 @@ export default class Heredity {
    */
   nextGeneration(): Heredity {
     this._nextGenPreHook.forEach(e => {
-      e.func.apply(e.thisVal, []);
+      e.fn.apply(e.thisVal, []);
     });
 
     this._history.push(this._population.duplicate());
@@ -260,25 +260,25 @@ export default class Heredity {
     );
 
     this._nextGenPostHook.forEach(e => {
-      e.func.apply(e.thisVal, []);
+      e.fn.apply(e.thisVal, []);
     });
 
     return this;
   }
 
-  addHook(type: string, thisVal: any, hook: () => void) {
+  addHook(type: string, thisVal: any, fn: () => void) {
     switch (type) {
       case "genPopPre":
-        this._genPopPreHook.push({ thisVal, func: hook });
+        this._genPopPreHook.push({ thisVal, fn });
         break;
       case "genPopPost":
-        this._genPopPostHook.push({ thisVal, func: hook });
+        this._genPopPostHook.push({ thisVal, fn });
         break;
       case "nextGenPre":
-        this._nextGenPreHook.push({ thisVal, func: hook });
+        this._nextGenPreHook.push({ thisVal, fn });
         break;
       case "nextGenPost":
-        this._nextGenPostHook.push({ thisVal, func: hook });
+        this._nextGenPostHook.push({ thisVal, fn });
         break;
     }
   }
@@ -418,5 +418,5 @@ interface TopChromosomeObject {
 /** Type checking for pre/post hooks */
 interface HookObject {
   thisVal: any;
-  func: () => void;
+  fn: () => void;
 }
