@@ -13,8 +13,19 @@ export default class DnaViz implements VizClass {
   private _lastChromosomeList = [];
 
   private _onPillHoverListeners: PillListenerObject[] = [];
+  private _onPillHoverLeaveListeners: PillListenerObject[] = [];
 
   private _style = `
+    .viz__dna-container {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 1em;
+      border: 1px solid #d0d0d0;
+      border-radius: 0.3em;
+
+      background: white;
+    }
+  
     .viz__dna-pill {
       border-radius: 0.5em;
       margin: 0.3em;
@@ -103,8 +114,7 @@ export default class DnaViz implements VizClass {
       this._parentElement = <HTMLElement>parentElement;
     }
 
-    this._parentElement.style.display = "flex";
-    this._parentElement.style.flexWrap = "wrap";
+    this._parentElement.classList.add("viz__dna-container");
 
     this._heredity = heredity;
 
@@ -131,7 +141,7 @@ export default class DnaViz implements VizClass {
     this.injectStylesheet(document.body, this._style);
 
     this._heredity.chromosomes.forEach(e => {
-      const dp = new DnaPill(e);
+      const dp = new DnaPill(e, this);
 
       this._dnaPills.set(e, dp);
       this._parentElement.appendChild(dp.element);
@@ -146,7 +156,7 @@ export default class DnaViz implements VizClass {
       this._parentElement.innerHTML = "";
 
       this._heredity.chromosomes.forEach(e => {
-        const dp = new DnaPill(e);
+        const dp = new DnaPill(e, this);
         this._dnaPills.set(e, dp);
         this._parentElement.appendChild(dp.element);
       });
@@ -175,8 +185,30 @@ export default class DnaViz implements VizClass {
     body.appendChild(node);
   }
 
-  onPillHover({ thisVal, listener }: PillListenerObject) {
+  onPillHover(
+    thisVal: any,
+    listener: (chromosome: GenericChromosome<any>) => void
+  ) {
     this._onPillHoverListeners.push({ thisVal, listener });
+  }
+
+  onPillHoverLeave(
+    thisVal: any,
+    listener: (chromosome: GenericChromosome<any>) => void
+  ) {
+    this._onPillHoverLeaveListeners.push({ thisVal, listener });
+  }
+
+  childCallingMouseHover(chromosome: GenericChromosome<any>) {
+    this._onPillHoverListeners.forEach(l => {
+      l.listener.apply(l.thisVal, [chromosome]);
+    });
+  }
+
+  childCallingMouseHoverLeave(chromosome: GenericChromosome<any>) {
+    this._onPillHoverLeaveListeners.forEach(l => {
+      l.listener.apply(l.thisVal, [chromosome]);
+    });
   }
 }
 
@@ -186,9 +218,11 @@ class DnaPill {
   private _geneReps: HTMLDivElement[];
 
   private _chromosome: GenericChromosome<any>;
+  private _dnaViz: DnaViz;
 
-  constructor(chromosome: GenericChromosome<any>) {
+  constructor(chromosome: GenericChromosome<any>, dnaViz: DnaViz) {
     this._chromosome = chromosome;
+    this._dnaViz = dnaViz;
 
     this._element = document.createElement("div");
 
@@ -205,6 +239,14 @@ class DnaPill {
       // this._element.appendChild(document.createTextNode(`${i}`));
       // Not sure why appendChild isn't working
       this._element.innerHTML += e.outerHTML;
+    });
+
+    this._element.addEventListener("mouseover", () => {
+      this._dnaViz.childCallingMouseHover(this._chromosome);
+    });
+
+    this._element.addEventListener("mouseleave", () => {
+      this._dnaViz.childCallingMouseHoverLeave(this._chromosome);
     });
   }
 
