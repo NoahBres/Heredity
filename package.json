@@ -35,8 +35,7 @@
       "json",
       "node"
     ],
-    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "testEnvironment": "node"
+    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$"
   },
   "repository": {
     "type": "git",
