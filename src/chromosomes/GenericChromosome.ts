@@ -28,6 +28,8 @@ export default class GenericChromosome<T> {
   /** Length of chromosome. Primarily used for generation. */
   protected _length: number = 0;
 
+  tags = new TagManager();
+
   /**
    * @example
    * ```typescript
@@ -87,5 +89,39 @@ export default class GenericChromosome<T> {
 
   get length(): number {
     return this._genes.length;
+  }
+}
+
+class TagManager extends Set {
+  private _changeListeners: (() => void)[] = [];
+
+  add(value: any) {
+    super.add(value);
+
+    this._changeListeners.forEach(f => {
+      f.apply(f, []);
+    });
+
+    return this;
+  }
+
+  clear() {
+    super.clear();
+
+    this._changeListeners.forEach(f => {
+      f.apply(f, []);
+    });
+  }
+
+  delete(value: any) {
+    this._changeListeners.forEach(f => {
+      f.apply(f, []);
+    });
+
+    return super.delete(value);
+  }
+
+  onChange(listener: () => void) {
+    this._changeListeners.push(listener);
   }
 }
