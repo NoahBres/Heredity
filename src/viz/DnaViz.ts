@@ -5,9 +5,7 @@ import VizClass from "./VizClass";
 export default class DnaViz implements VizClass {
   _heredity: Heredity;
   _parentElement: HTMLElement;
-  _options: {};
 
-  // private _dnaPills: DnaPill[] = [];
   private _dnaPills: Map<GenericChromosome<any>, DnaPill> = new Map();
 
   private _lastChromosomeList = [];
@@ -101,11 +99,9 @@ export default class DnaViz implements VizClass {
     }
   `;
 
-  constructor(
-    parentElement: string | HTMLElement,
-    heredity: Heredity,
-    options: {} = {}
-  ) {
+  private _styleId = "dna-viz-style-id";
+
+  constructor(parentElement: string | HTMLElement, heredity: Heredity) {
     if (parentElement instanceof String) {
       this._parentElement = <HTMLElement>(
         document.getElementById(<string>parentElement)
@@ -115,10 +111,9 @@ export default class DnaViz implements VizClass {
     }
 
     this._parentElement.classList.add("viz__dna-container");
+    this.injectStylesheet(this._style, this._styleId);
 
     this._heredity = heredity;
-
-    this._options = options;
 
     heredity.addHook("genPopPost", this, this.init);
     heredity.addHook("nextGenPost", this, this.update);
@@ -137,8 +132,6 @@ export default class DnaViz implements VizClass {
       this.update();
       return;
     }
-
-    this.injectStylesheet(document.body, this._style);
 
     this._heredity.chromosomes.forEach(e => {
       const dp = new DnaPill(e, this);
@@ -178,11 +171,18 @@ export default class DnaViz implements VizClass {
     // }
   }
 
-  private injectStylesheet(body: HTMLElement, style: string) {
+  private injectStylesheet(style: string, styleId: string) {
+    const existingScript = document.getElementById(styleId);
+
+    if (existingScript) {
+      return;
+    }
+
     const node = document.createElement("style");
     node.innerHTML = style;
+    node.id = styleId;
 
-    body.appendChild(node);
+    document.body.appendChild(node);
   }
 
   onPillHover(

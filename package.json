@@ -8,7 +8,7 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "build:esm": "tsc -m es6 --outDir dist-esm",
-    "build:all": "build build:esm bundle",
+    "build:all": "yarn build && yarn build:esm && yarn bundle",
     "bundle": "webpack",
     "lint": "tslint --format stylish --project \"./tsconfig.json\"",
     "test": "jest --color --coverage --notify",
@@ -56,6 +56,7 @@
   },
   "homepage": "https://github.com/NoahBres/Heredity#readme",
   "devDependencies": {
+    "@types/d3": "^5.0.1",
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.9",
     "jest": "^23.6.0",
@@ -72,5 +73,8 @@
   },
   "files": [
     "dist/**/*"
-  ]
+  ],
+  "dependencies": {
+    "d3": "^5.7.0"
+  }
 }

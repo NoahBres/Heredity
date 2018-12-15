@@ -22,13 +22,13 @@ import GenericChromosome from "./GenericChromosome";
  */
 export default class NumberChromosome extends GenericChromosome<number> {
   /** Maximum value of number */
-  private _upperBound: number;
+  protected _upperBound: number;
   /** Minimum value of number */
-  private _lowerBound: number;
+  protected _lowerBound: number;
   /** Whether or not to keep the numbers rounded (integers) */
-  private _round: boolean;
+  protected _round: boolean;
   /** (not actually implemented) Whether to clamp the number during mutations */
-  private _clamp: boolean;
+  protected _clamp: boolean;
 
   /**
    * @example
