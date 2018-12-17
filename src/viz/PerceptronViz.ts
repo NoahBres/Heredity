@@ -1,8 +1,9 @@
 import Heredity from "../Heredity";
 import VizClass from "./VizClass";
+import DnaViz from "./DnaViz";
 import NeuralChromosome from "../chromosomes/NeuralChromosome";
 import * as d3 from "d3";
-import { appendFile } from "fs-extra";
+import { GenericChromosome } from "..";
 
 // TODO Optimize by minimizing DOM manipulation
 // Don't delete DOM on refresh
@@ -15,6 +16,7 @@ export default class PerceptronViz implements VizClass {
   private _options: {
     index?: number;
     chromosome?: NeuralChromosome;
+    threshhold?: (i: number) => boolean;
   } = {};
 
   private _nodeRadius = 25;
@@ -25,10 +27,14 @@ export default class PerceptronViz implements VizClass {
   private _d3Initialized = false;
   private _d3ScriptId = "perceptron-viz-d3-id";
 
+  private _lastHistoryLength = 0;
+
   private _graph: GraphInterface = {
     nodes: [],
     links: []
   };
+
+  private _nodeColors = d3.scaleOrdinal(d3.schemeCategory10);
 
   private _style = `
     .viz__perceptron-container {
@@ -47,13 +53,28 @@ export default class PerceptronViz implements VizClass {
     }
 
     .link text {
-      font-size: 13px;
+      font-size: 0.8em;
     }
 
     .node circle {
       stroke: #fff;
       stroke-width: 3px;
       cursor: pointer;
+
+      transition: 200ms ease;
+    }
+
+    .node circle:hover {
+      stroke: rgba(0, 0, 0, 0.4);
+    }
+
+    .node text {
+      font-size: 0.8em;
+    }
+
+    .node .output.activated {
+      stroke: rgba(0, 0, 0, 0.4);
+      stroke-width: 6px;
     }
   `;
 
@@ -63,8 +84,9 @@ export default class PerceptronViz implements VizClass {
     parentElement: string | HTMLElement,
     heredity: Heredity,
     options: {
-      index: number;
+      index?: number;
       chromosome?: NeuralChromosome;
+      threshhold?: (i: number) => boolean;
     }
   ) {
     if (parentElement instanceof String) {
@@ -111,9 +133,6 @@ export default class PerceptronViz implements VizClass {
     this._d3Initialized = true;
     this.initd3();
 
-    console.log(this._graph);
-    this._graph.nodes[0].value = 10;
-
     this.updated3();
 
     this._parentElement.dataset.initialized = "true";
@@ -142,7 +161,6 @@ export default class PerceptronViz implements VizClass {
     if (this._chromosome !== undefined) {
       graphCoords = this.genGraphCoords(this._chromosome);
       this._graph = this.buildGraph(this._chromosome, graphCoords);
-      console.log(this._graph);
     }
 
     const svg = d3.select(this._parentElement).append("svg");
@@ -150,8 +168,6 @@ export default class PerceptronViz implements VizClass {
     const height = this._parentElement.clientHeight;
     svg.attr("width", width);
     svg.attr("height", height);
-
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
 
     // const simulation = d3
     //   .forceSimulation()
@@ -235,7 +251,8 @@ export default class PerceptronViz implements VizClass {
       .append("circle")
       // .enter()
       .attr("r", this._nodeRadius)
-      .attr("fill", d => color(String(d.group)));
+      .attr("class", d => (d.id.indexOf("output") !== -1 ? "output" : ""))
+      .attr("fill", d => this._nodeColors(String(d.group)));
 
     // const node = svg
     //   .append("g")
@@ -305,16 +322,24 @@ export default class PerceptronViz implements VizClass {
       return;
     }
 
-    if (this._options.chromosome !== undefined) {
-      this._chromosome = this._options.chromosome;
-    } else {
-      this._chromosome = <NeuralChromosome>(
-        this._heredity.chromosomes[this._options.index!]
-      );
+    if (this._heredity.history.length !== this._lastHistoryLength) {
+      if (this._options.chromosome !== undefined) {
+        this._chromosome = this._options.chromosome;
+      } else {
+        this._chromosome = <NeuralChromosome>(
+          this._heredity.chromosomes[this._options.index!]
+        );
+      }
+
+      this._chromosome!.onCompute(this._chromosome, () => {
+        this.updated3();
+      });
+
+      this._lastHistoryLength = this._heredity.history.length;
     }
 
     const graphCoords = this.genGraphCoords(this._chromosome!);
-    this._graph = this.buildGraph(this._chromosome!, graphCoords);
+    // this._graph = this.buildGraph(this._chromosome!, graphCoords);
     this.updated3();
   }
 
@@ -331,20 +356,46 @@ export default class PerceptronViz implements VizClass {
       .enter()
       .append("text")
       .merge(<any>links)
-      .text((d: any) => d.value);
+      .text((d: any) => `${d.value.toString().substring(0, 11)}`);
+
     this._graph = this.buildGraph(
       this._chromosome!,
       this.genGraphCoords(this._chromosome!)
     );
+
     const nodes = d3.selectAll(".node-text").data(this._graph.nodes);
     // links.text((d: any) => d.value);
-    console.log(this._graph.nodes);
-    links.exit().remove();
-    links
+    nodes.exit().remove();
+    nodes
       .enter()
       .append("text")
-      .merge(<any>links)
-      .text((d: any) => d.value);
+      .merge(<any>nodes)
+      .text((d: any) => {
+        let value = d.value;
+        value = value === 0 ? `0` : `${value.toString().substring(0, 5)}...`;
+        return value;
+      });
+
+    if (this._options.threshhold) {
+      const outputNeuronCount = this._chromosome!.cerebrum.layers[
+        this._chromosome!.cerebrum.layers.length - 1
+      ].neurons.length;
+      const outputs = d3
+        .selectAll(".output")
+        .data(
+          this._graph.nodes.slice(this._graph.nodes.length - outputNeuronCount)
+        );
+      outputs.attr("fill", d =>
+        this._options.threshhold!.apply(null, [(<any>d).value])
+          ? this._nodeColors(String(d.group + 1))
+          : this._nodeColors(String(d.group))
+      );
+      outputs.attr("class", d =>
+        this._options.threshhold!.apply(null, [(<any>d).value])
+          ? "output activated"
+          : "output"
+      );
+    }
   }
 
   // Fancy wobbly touchy display. Didn't work
@@ -521,7 +572,7 @@ export default class PerceptronViz implements VizClass {
             graph.links.push({
               target: `hidden${weightIndex}L${layerIndex - 1}`,
               source: thisId,
-              value: e.toString().substring(0, 9)
+              value: e // .toString().substring(0, 9)
             });
           });
         });
@@ -552,7 +603,7 @@ export default class PerceptronViz implements VizClass {
             graph.links.push({
               target,
               source: thisId,
-              value: e.toString().substring(0, 9)
+              value: e // .toString().substring(0, 9)
             });
           });
         });
@@ -636,6 +687,19 @@ export default class PerceptronViz implements VizClass {
 
     if (existingScript && callback) callback();
   }
+
+  link(toLink: VizClass): boolean {
+    if (toLink instanceof DnaViz) {
+      toLink.onPillHover(this, (chrom: GenericChromosome<any>) => {
+        console.log("Test");
+        this._chromosome = <NeuralChromosome>chrom;
+        this.init();
+      });
+
+      return true;
+    }
+    return false;
+  }
 }
 
 interface GraphNodeInterface {
@@ -649,7 +713,7 @@ interface GraphNodeInterface {
 interface GraphLinkInterface {
   source: string;
   target: string;
-  value: string;
+  value: number;
 }
 
 interface GraphInterface {

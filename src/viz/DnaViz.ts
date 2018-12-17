@@ -1,6 +1,7 @@
 import Heredity from "../Heredity";
 import GenericChromosome from "../chromosomes/GenericChromosome";
 import VizClass from "./VizClass";
+import PerceptronViz from "./PerceptronViz";
 
 export default class DnaViz implements VizClass {
   _heredity: Heredity;
@@ -209,6 +210,14 @@ export default class DnaViz implements VizClass {
     this._onPillHoverLeaveListeners.forEach(l => {
       l.listener.apply(l.thisVal, [chromosome]);
     });
+  }
+
+  link(toLink: VizClass): boolean {
+    if (toLink instanceof PerceptronViz) {
+      toLink.link(this);
+      return true;
+    }
+    return false;
   }
 }
 
