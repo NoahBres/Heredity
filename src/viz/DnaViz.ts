@@ -266,7 +266,6 @@ class DnaPill {
   update() {
     if (this._chromosome.tags.has("dead")) {
       this._element.classList.add("dead");
-      // console.log(this._chromosome);
     }
   }
 }

@@ -36,27 +36,46 @@ export default class PerceptronViz implements VizClass {
 
   private _nodeColors = d3.scaleOrdinal(d3.schemeCategory10);
 
+  private _deadIndicatorElement: HTMLElement;
+
+  private _dnaPill: DnaPill | undefined;
+
+  private _skullSvg =
+    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Your_Icon" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve"><path d="M89.12,85.757c-4.392-1.602-4.796,2.233-12.704-0.645l-15.48-5.634l15.479-5.635c7.911-2.875,8.31,0.957,12.706-0.643  c1.754-0.639,2.875-3.036,2.234-4.796c-0.639-1.757-1.079-1.595-1.716-3.354c-0.642-1.76-0.201-1.918-0.843-3.675  c-0.639-1.761-3.037-2.876-4.794-2.233c-4.394,1.596-2.238,4.793-10.146,7.672L50,75.498l-23.858-8.684  c-7.909-2.878-5.75-6.076-10.145-7.674c-1.756-0.639-4.153,0.478-4.793,2.237c-0.643,1.755-0.202,1.916-0.84,3.674  c-0.64,1.756-1.081,1.6-1.723,3.355c-0.638,1.76,0.481,4.155,2.238,4.796c4.396,1.599,4.794-2.236,12.704,0.642l15.48,5.634  l-15.48,5.635c-7.909,2.879-8.311-0.959-12.704,0.643c-1.756,0.639-2.875,3.035-2.234,4.795c0.636,1.758,1.076,1.598,1.719,3.354  c0.639,1.757,0.2,1.92,0.836,3.679c0.643,1.758,3.039,2.874,4.798,2.235c4.396-1.602,2.235-4.795,10.144-7.675L50,83.459  l23.857,8.683c7.909,2.883,5.751,6.075,10.146,7.676c1.755,0.638,4.154-0.479,4.795-2.238c0.64-1.756,0.198-1.916,0.842-3.673  c0.639-1.76,1.079-1.599,1.717-3.356C91.999,88.791,90.879,86.394,89.12,85.757z"/><path d="M50,0C36.745,0,26,10.745,26,24v21c0,2.2,1.323,5.221,2.939,6.713l7.121,6.574c1.617,1.492,3.39,4.288,3.939,6.213  s2.8,3.5,5,3.5h10c2.2,0,4.45-1.575,5-3.5s2.322-4.721,3.939-6.213l7.121-6.574C72.678,50.221,74,47.2,74,45V24  C74,10.745,63.255,0,50,0z M38.461,49C34.596,49,32,45.768,32,42.455C32,39.141,35.134,37,39,37s7,2.141,7,5.455  C46,45.768,42.328,49,38.461,49z M50,58c-2,0-3-1-3-3s2-6,3-6s3,4,3,6S52,58,50,58z M61.538,49C57.673,49,54,45.768,54,42.455  C54,39.141,57.134,37,61,37s7,2.141,7,5.455C68,45.768,65.404,49,61.538,49z"/></svg>';
+
   private _style = `
     .viz__perceptron-container {
       background: white;
       border-radius: 0.3em;
       border: 1px solid #d0d0d0;
+
+      position: relative;
     }
 
-    .viz__perceptron-canvas {
+    .viz__perceptron-container .dead-indicator svg {
+      position: absolute;
+      top: 0.5em;
+      left: 0.5em;
 
+      height: 1.5em;
+      width: 1.5em;
+      fill: #d62728;
     }
 
-    .link line {
+    .viz__perceptron-container .dead-indicator.hidden {
+      display: none;
+    }
+
+    .viz__perceptron-container .link line {
       stroke: #999;
       stroke-opacity: 0.6;
     }
 
-    .link text {
+    .viz__perceptron-container .link text {
       font-size: 0.8em;
     }
 
-    .node circle {
+    .viz__perceptron-container .node circle {
       stroke: #fff;
       stroke-width: 3px;
       cursor: pointer;
@@ -64,17 +83,89 @@ export default class PerceptronViz implements VizClass {
       transition: 200ms ease;
     }
 
-    .node circle:hover {
+    .viz__perceptron-container .node circle:hover {
       stroke: rgba(0, 0, 0, 0.4);
     }
 
-    .node text {
+    .viz__perceptron-container .node text {
       font-size: 0.8em;
     }
 
-    .node .output.activated {
+    .viz__perceptron-container .node .output.activated {
       stroke: rgba(0, 0, 0, 0.4);
       stroke-width: 6px;
+    }
+
+    .viz__perceptron-dna-pill {
+      position: absolute;
+      top: 50%;
+      left: 0.1em;
+
+      border-radius: 0.5em;
+      margin: 0.3em;
+
+      transform: translateY(-50%);
+
+      box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.12);    
+    
+      transition: 300ms ease;
+    }
+    
+    .viz__perceptron-dna-pill:hover {
+      opacity: 1;
+      cursor: pointer;
+    }
+    
+    .viz__perceptron-dna-pill .viz__perceptron-dna-pill-gene {
+      width: 0.7em;
+      height: 0.7em;
+
+      position: relative;
+    }
+
+    .viz__perceptron-dna-pill .viz__perceptron-dna-pill-gene:first-child {
+      border-top-left-radius: 0.5em;
+      border-top-right-radius: 0.5em;
+    }
+
+    .viz__perceptron-dna-pill .viz__perceptron-dna-pill-gene:last-child {
+      border-bottom-left-radius: 0.5em;
+      border-bottom-right-radius: 0.5em;
+    }
+
+    .viz__perceptron-dna-pill .viz__perceptron-dna-pill-gene:hover {
+      border: 2px solid red;
+    }
+
+    .viz__perceptron-dna-pill .viz__perceptron-dna-pill-gene:before {
+      content: attr(data-value);
+      
+      position: absolute;
+      top: 50%;
+      right: 180%;
+
+      transform: translateY(-50%) translateX(1em);
+
+      padding: 0.3em 0.6em;
+
+      background: white;
+
+      font-size: 0.8em;
+
+      opacity: 0;
+      z-index: 99;
+      pointer-events: none;
+
+      box-shadow: 0px 4px 11px 0px rgba(0, 0, 0, 0.12);
+      border: 1px solid #d0d0d0;
+      border-radius: 0.3em;
+
+      transition: 300ms ease;
+    }
+
+    .viz__perceptron-dna-pill .viz__perceptron-dna-pill-gene:hover:before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
     }
   `;
 
@@ -99,6 +190,11 @@ export default class PerceptronViz implements VizClass {
 
     this._parentElement.classList.add("viz__perceptron-container");
 
+    this._deadIndicatorElement = document.createElement("div");
+    this._deadIndicatorElement.classList.add("dead-indicator", "hidden");
+    this._deadIndicatorElement.innerHTML = this._skullSvg;
+    this._parentElement.appendChild(this._deadIndicatorElement);
+
     this._options = options;
     this._heredity = heredity;
 
@@ -120,6 +216,14 @@ export default class PerceptronViz implements VizClass {
       );
     }
 
+    if (!this._chromosome.tags.has("dead")) {
+      this._deadIndicatorElement.classList.add("hidden");
+    } else {
+      this._deadIndicatorElement.classList.remove("hidden");
+    }
+
+    this._dnaPill = new DnaPill(this._chromosome, this);
+
     this.injectStylesheet(this._style, this._styleId);
     // this.injectScript(
     //   this._d3Url,
@@ -132,6 +236,10 @@ export default class PerceptronViz implements VizClass {
     // Remove the initialized tag later
     this._d3Initialized = true;
     this.initd3();
+
+    this._chromosome!.onCompute(this._chromosome, () => {
+      this.updated3();
+    });
 
     this.updated3();
 
@@ -311,32 +419,37 @@ export default class PerceptronViz implements VizClass {
     //   d.fx = null;
     //   d.fy = null;
     // }
+  }
+
+  update(): void {
+    // To be removed
+    // if (!this._d3Initialized) {
+    //   return;
+    // }
+
+    // if (this._heredity.history.length !== this._lastHistoryLength) {
+    if (this._options.chromosome !== undefined) {
+      this._chromosome = this._options.chromosome;
+    } else {
+      this._chromosome = <NeuralChromosome>(
+        this._heredity.chromosomes[this._options.index!]
+      );
+    }
+
+    if (!this._chromosome.tags.has("dead")) {
+      this._deadIndicatorElement.classList.add("hidden");
+    } else {
+      this._deadIndicatorElement.classList.remove("hidden");
+    }
+
+    this._dnaPill!.update(this._chromosome);
 
     this._chromosome!.onCompute(this._chromosome, () => {
       this.updated3();
     });
-  }
 
-  update(): void {
-    if (!this._d3Initialized) {
-      return;
-    }
-
-    if (this._heredity.history.length !== this._lastHistoryLength) {
-      if (this._options.chromosome !== undefined) {
-        this._chromosome = this._options.chromosome;
-      } else {
-        this._chromosome = <NeuralChromosome>(
-          this._heredity.chromosomes[this._options.index!]
-        );
-      }
-
-      this._chromosome!.onCompute(this._chromosome, () => {
-        this.updated3();
-      });
-
-      this._lastHistoryLength = this._heredity.history.length;
-    }
+    this._lastHistoryLength = this._heredity.history.length;
+    // }
 
     const graphCoords = this.genGraphCoords(this._chromosome!);
     // this._graph = this.buildGraph(this._chromosome!, graphCoords);
@@ -691,14 +804,69 @@ export default class PerceptronViz implements VizClass {
   link(toLink: VizClass): boolean {
     if (toLink instanceof DnaViz) {
       toLink.onPillHover(this, (chrom: GenericChromosome<any>) => {
-        console.log("Test");
-        this._chromosome = <NeuralChromosome>chrom;
+        this._options.chromosome = <NeuralChromosome>chrom;
+        this._options.index = undefined;
         this.init();
+        this._chromosome!.onCompute(this._chromosome, () => {
+          this.updated3();
+        });
       });
 
       return true;
     }
     return false;
+  }
+}
+
+class DnaPill {
+  private _element: HTMLDivElement;
+
+  private _geneReps: HTMLDivElement[];
+
+  private _chromosome: NeuralChromosome;
+  private _perceptronViz: PerceptronViz;
+
+  constructor(chromosome: NeuralChromosome, perceptronViz: PerceptronViz) {
+    this._chromosome = chromosome;
+    this._perceptronViz = perceptronViz;
+
+    this._element = document.createElement("div");
+
+    this._element.className = "viz__perceptron-dna-pill";
+
+    this._geneReps = Array(this._chromosome.length).fill(
+      document.createElement("div")
+    );
+
+    this._geneReps.forEach((e, i) => {
+      e.className = "viz__perceptron-dna-pill-gene";
+      e.style.background = `hsl(${chromosome.getColorsHue()[i]},100%,60%)`;
+      e.dataset.value = chromosome.genes[i].toString();
+      // this._element.appendChild(e);
+      // this._element.appendChild(document.createTextNode(`${i}`));
+      // Not sure why appendChild isn't working
+      this._element.innerHTML += e.outerHTML;
+    });
+
+    perceptronViz._parentElement.appendChild(this._element);
+  }
+
+  update(neuralChromosome: NeuralChromosome) {
+    this._chromosome = neuralChromosome;
+
+    this._element.innerHTML = "";
+
+    this._geneReps.forEach((e, i) => {
+      e.className = "viz__perceptron-dna-pill-gene";
+      e.style.background = `hsl(${
+        this._chromosome.getColorsHue()[i]
+      },100%,60%)`;
+      e.dataset.value = this._chromosome.genes[i].toString();
+      // this._element.appendChild(e);
+      // this._element.appendChild(document.createTextNode(`${i}`));
+      // Not sure why appendChild isn't working
+      this._element.innerHTML += e.outerHTML;
+    });
   }
 }
 
