@@ -99,7 +99,7 @@ export default class PerceptronViz implements VizClass {
     .viz__perceptron-dna-pill {
       position: absolute;
       top: 50%;
-      left: 0.1em;
+      left: 0.55em;
 
       border-radius: 0.5em;
       margin: 0.3em;
@@ -430,6 +430,7 @@ export default class PerceptronViz implements VizClass {
     // if (this._heredity.history.length !== this._lastHistoryLength) {
     if (this._options.chromosome !== undefined) {
       this._chromosome = this._options.chromosome;
+      this._options.chromosome = undefined;
     } else {
       this._chromosome = <NeuralChromosome>(
         this._heredity.chromosomes[this._options.index!]
@@ -805,7 +806,7 @@ export default class PerceptronViz implements VizClass {
     if (toLink instanceof DnaViz) {
       toLink.onPillHover(this, (chrom: GenericChromosome<any>) => {
         this._options.chromosome = <NeuralChromosome>chrom;
-        this._options.index = undefined;
+        // this._options.index = undefined;
         this.init();
         this._chromosome!.onCompute(this._chromosome, () => {
           this.updated3();
