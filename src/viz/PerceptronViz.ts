@@ -1,5 +1,5 @@
 import Heredity from "../Heredity";
-import VizClass from "./VizClass";
+import { default as VizClass, injectStylesheet } from "./VizClass";
 import DnaViz from "./DnaViz";
 import NeuralChromosome from "../chromosomes/NeuralChromosome";
 import * as d3 from "d3";
@@ -224,7 +224,7 @@ export default class PerceptronViz implements VizClass {
 
     this._dnaPill = new DnaPill(this._chromosome, this);
 
-    this.injectStylesheet(this._style, this._styleId);
+    injectStylesheet(this._style, this._styleId);
     // this.injectScript(
     //   this._d3Url,
     //   () => {
@@ -768,20 +768,6 @@ export default class PerceptronViz implements VizClass {
     });
 
     return coords;
-  }
-
-  private injectStylesheet(style: string, styleId: string) {
-    const existingScript = document.getElementById(styleId);
-
-    if (existingScript) {
-      return;
-    }
-
-    const node = document.createElement("style");
-    node.innerHTML = style;
-    node.id = styleId;
-
-    document.body.appendChild(node);
   }
 
   private injectScript(url: string, callback: () => void, scriptId: string) {
