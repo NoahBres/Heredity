@@ -5,6 +5,12 @@ export default class TopGeneViz implements VizClass {
   _heredity: Heredity;
   _parentElement: HTMLElement;
 
+  private _style = `
+
+  `;
+
+  private _styleId = "top-genes-style-id";
+
   constructor(parentElement: string | HTMLElement, heredity: Heredity) {
     this._heredity = heredity;
     if (parentElement instanceof String) {
@@ -14,15 +20,32 @@ export default class TopGeneViz implements VizClass {
     } else {
       this._parentElement = <HTMLElement>parentElement;
     }
+
+    this._parentElement.classList.add("viz__top-genes-container");
+    this.injectStylesheet(this._style, this._styleId);
+
+    this._heredity = heredity;
   }
 
-  init(): void {
-    throw new Error("Method not implemented.");
+  init() {}
+
+  update() {}
+
+  link(toLink: VizClass) {
+    return false;
   }
-  update(): void {
-    throw new Error("Method not implemented.");
-  }
-  link(toLink: VizClass): boolean {
-    throw new Error("Method not implemented.");
+
+  private injectStylesheet(style: string, styleId: string) {
+    const existingScript = document.getElementById(styleId);
+
+    if (existingScript) {
+      return;
+    }
+
+    const node = document.createElement("style");
+    node.innerHTML = style;
+    node.id = styleId;
+
+    document.body.appendChild(node);
   }
 }
