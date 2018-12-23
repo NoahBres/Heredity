@@ -7,6 +7,8 @@ import { GenericChromosome } from "..";
 
 // TODO Optimize by minimizing DOM manipulation
 // Don't delete DOM on refresh
+// TODO Remove comments. Write TSDoc
+// TODO Move DNAPill to separate class
 
 export default class PerceptronViz implements VizClass {
   _heredity: Heredity;
@@ -23,11 +25,11 @@ export default class PerceptronViz implements VizClass {
   private _nodeMargin = 10;
   private _padding = 20;
 
-  private _d3Url = "https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js";
-  private _d3Initialized = false;
-  private _d3ScriptId = "perceptron-viz-d3-id";
+  // private _d3Url = "https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js";
+  // private _d3Initialized = false;
+  // private _d3ScriptId = "perceptron-viz-d3-id";
 
-  private _lastHistoryLength = 0;
+  // private _lastHistoryLength = 0;
 
   private _graph: GraphInterface = {
     nodes: [],
@@ -189,6 +191,7 @@ export default class PerceptronViz implements VizClass {
     }
 
     this._parentElement.classList.add("viz__perceptron-container");
+    injectStylesheet(this._style, this._styleId);
 
     this._deadIndicatorElement = document.createElement("div");
     this._deadIndicatorElement.classList.add("dead-indicator", "hidden");
@@ -224,7 +227,6 @@ export default class PerceptronViz implements VizClass {
 
     this._dnaPill = new DnaPill(this._chromosome, this);
 
-    injectStylesheet(this._style, this._styleId);
     // this.injectScript(
     //   this._d3Url,
     //   () => {
@@ -234,7 +236,7 @@ export default class PerceptronViz implements VizClass {
     //   this._d3ScriptId
     // );
     // Remove the initialized tag later
-    this._d3Initialized = true;
+    // this._d3Initialized = true;
     this.initd3();
 
     this._chromosome!.onCompute(this._chromosome, () => {
@@ -449,7 +451,7 @@ export default class PerceptronViz implements VizClass {
       this.updated3();
     });
 
-    this._lastHistoryLength = this._heredity.history.length;
+    // this._lastHistoryLength = this._heredity.history.length;
     // }
 
     const graphCoords = this.genGraphCoords(this._chromosome!);
@@ -770,23 +772,23 @@ export default class PerceptronViz implements VizClass {
     return coords;
   }
 
-  private injectScript(url: string, callback: () => void, scriptId: string) {
-    const existingScript = document.getElementById(scriptId);
+  // private injectScript(url: string, callback: () => void, scriptId: string) {
+  //   const existingScript = document.getElementById(scriptId);
 
-    if (!existingScript) {
-      const script = document.createElement("script");
-      script.src = url;
-      script.id = scriptId;
+  //   if (!existingScript) {
+  //     const script = document.createElement("script");
+  //     script.src = url;
+  //     script.id = scriptId;
 
-      document.body.appendChild(script);
+  //     document.body.appendChild(script);
 
-      script.onload = () => {
-        if (callback) callback();
-      };
-    }
+  //     script.onload = () => {
+  //       if (callback) callback();
+  //     };
+  //   }
 
-    if (existingScript && callback) callback();
-  }
+  //   if (existingScript && callback) callback();
+  // }
 
   link(toLink: VizClass): boolean {
     if (toLink instanceof DnaViz) {

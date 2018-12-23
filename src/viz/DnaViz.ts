@@ -3,6 +3,10 @@ import GenericChromosome from "../chromosomes/GenericChromosome";
 import { default as VizClass, injectStylesheet } from "./VizClass";
 import PerceptronViz from "./PerceptronViz";
 
+// TODO Optimize by minimizing DOM manipulation
+// Don't delete DOM on refresh
+// TODO Move DNAPill to separate class
+
 export default class DnaViz implements VizClass {
   _heredity: Heredity;
   _parentElement: HTMLElement;
