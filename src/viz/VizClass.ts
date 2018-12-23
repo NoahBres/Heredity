@@ -46,41 +46,41 @@ export class DnaPill {
       transition: 300ms ease;
     }
     
-    .viz__dna-pill.dead {
+    .${this._baseClassName}.dead {
       box-shadow: none;
       opacity: 0.5;
       
       transform: scale(0.8);
     }
     
-    .viz__dna-pill:hover {
+    .${this._baseClassName}:hover {
       opacity: 1;
       transform: scale(1);
       cursor: pointer;
     }
     
-    .viz__dna-pill .viz__dna-pill-gene {
+    .${this._baseClassName} .${this._baseClassName}-gene {
       width: 0.8em;
       height: 0.8em;
 
       position: relative;
     }
 
-    .viz__dna-pill .viz__dna-pill-gene:first-child {
+    .${this._baseClassName} .${this._baseClassName}-gene:first-child {
       border-top-left-radius: 0.5em;
       border-top-right-radius: 0.5em;
     }
 
-    .viz__dna-pill .viz__dna-pill-gene:last-child {
+    .${this._baseClassName} .${this._baseClassName}-gene:last-child {
       border-bottom-left-radius: 0.5em;
       border-bottom-right-radius: 0.5em;
     }
 
-    .viz__dna-pill .viz__dna-pill-gene:hover {
+    .${this._baseClassName} .${this._baseClassName}-gene:hover {
       border: 2px solid red;
     }
 
-    .viz__dna-pill .viz__dna-pill-gene:before {
+    .${this._baseClassName} .${this._baseClassName}-gene:before {
       content: attr(data-value);
       
       position: absolute;
@@ -106,7 +106,7 @@ export class DnaPill {
       transition: 300ms ease;
     }
 
-    .viz__dna-pill .viz__dna-pill-gene:hover:before {
+    .${this._baseClassName} .${this._baseClassName}-gene:hover:before {
       opacity: 1;
       transform: translateY(-50%) translateX(0);
     }
@@ -140,11 +140,19 @@ export class DnaPill {
       this._element.innerHTML += e.outerHTML;
     });
 
-    injectStylesheet(this._style, this._styleId);
-  }
+    this._element.addEventListener("mouseover", () => {
+      this._onHoverListeners.forEach(fn => {
+        fn.listener.apply(fn.thisVal, [this._chromosome]);
+      });
+    });
 
-  get element() {
-    return this._element;
+    this._element.addEventListener("mouseleave", () => {
+      this._onHoverLeaveListeners.forEach(fn => {
+        fn.listener.apply(fn.thisVal, [this._chromosome]);
+      });
+    });
+
+    injectStylesheet(this._style, this._styleId);
   }
 
   update() {
@@ -175,6 +183,28 @@ export class DnaPill {
   setChromosome(chromosome: GenericChromosome<any>) {
     this._chromosome = chromosome;
     this._dirty = true;
+  }
+
+  onHover(
+    thisVal: any,
+    listener: (chromosome: GenericChromosome<any>) => void
+  ) {
+    this._onHoverListeners.push({ thisVal, listener });
+  }
+
+  onHoverLeave(
+    thisVal: any,
+    listener: (chromosome: GenericChromosome<any>) => void
+  ) {
+    this._onHoverLeaveListeners.push({ thisVal, listener });
+  }
+
+  get baseClassName(): string {
+    return this._baseClassName;
+  }
+
+  get element(): HTMLDivElement {
+    return this._element;
   }
 }
 
