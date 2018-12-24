@@ -21,7 +21,7 @@ export function injectStylesheet(style: string, styleId: string) {
   node.innerHTML = style;
   node.id = styleId;
 
-  document.body.appendChild(node);
+  document.head!.appendChild(node);
 }
 
 export class DnaPill {
@@ -35,6 +35,7 @@ export class DnaPill {
   private _onHoverLeaveListeners: PillListenerObject[] = [];
 
   private readonly _baseClassName = "viz__base-dna-pill";
+  private _alternativeClassName = "";
 
   private _style = `
     .${this._baseClassName} {
@@ -122,8 +123,9 @@ export class DnaPill {
     this._element = document.createElement("div");
 
     this._element.classList.add(this._baseClassName);
-    if (className) {
-      this._element.classList.add(className);
+    this._alternativeClassName = className ? className : "";
+    if (this._alternativeClassName.length > 0) {
+      this._element.classList.add(this._alternativeClassName);
     }
 
     this._geneReps = Array(this._chromosome.length).fill(
@@ -131,7 +133,10 @@ export class DnaPill {
     );
 
     this._geneReps.forEach((e, i) => {
-      e.className = `${this._baseClassName}-gene`;
+      e.classList.add(`${this._baseClassName}-gene`);
+      if (this._alternativeClassName.length > 0) {
+        e.classList.add(`${this._alternativeClassName}-gene`);
+      }
       e.style.background = `hsl(${chromosome.getColorsHue()[i]},100%,60%)`;
       e.dataset.value = chromosome.genes[i].toString();
       // this._element.appendChild(e);
