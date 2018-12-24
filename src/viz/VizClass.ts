@@ -1,5 +1,6 @@
 import { default as Heredity } from "../Heredity";
-import { NeuralChromosome, GenericChromosome } from "..";
+import GenericChromosome from "../chromosomes/GenericChromosome";
+import NeuralChromosome from "../chromosomes/NeuralChromosome";
 
 export default interface VizClass {
   readonly _heredity: Heredity;
@@ -39,6 +40,8 @@ export class DnaPill {
 
   private _style = `
     .${this._baseClassName} {
+      display: inline-block;
+
       border-radius: 0.5em;
       margin: 0.3em;
 

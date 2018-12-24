@@ -3,7 +3,7 @@ import { default as VizClass, injectStylesheet, DnaPill } from "./VizClass";
 import DnaViz from "./DnaViz";
 import NeuralChromosome from "../chromosomes/NeuralChromosome";
 import * as d3 from "d3";
-import { GenericChromosome } from "..";
+import GenericChromosome from "../chromosomes/GenericChromosome";
 
 // TODO Optimize by minimizing DOM manipulation
 // Don't delete DOM on refresh
@@ -118,9 +118,9 @@ export default class PerceptronViz implements VizClass {
       transform: translateY(-50%)!important;
     }
 
-    .${this._dnaPillClassName} .${this._dnaPillClassName} {
-      width: 0.7em;
-      height: 0.7em;
+    .${this._dnaPillClassName} .${this._dnaPillClassName}-gene {
+      width: 0.7em!important;
+      height: 0.7em!important;
     }
   `;
 
