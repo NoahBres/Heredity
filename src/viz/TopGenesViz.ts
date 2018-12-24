@@ -29,14 +29,12 @@ export default class TopGeneViz implements VizClass {
     } else {
       this._parentElement = <HTMLElement>parentElement;
     }
-
+    console.log(this._parentElement);
     this._parentElement.classList.add("viz__top-genes-container");
     injectStylesheet(this._style, this._styleId);
-
     this._heredity = heredity;
-
-    // heredity.addHook("genPopPost", this, this.init);
-    // heredity.addHook("nextGenPost", this, this.update);
+    heredity.addHook("genPopPost", this, this.init);
+    heredity.addHook("nextGenPost", this, this.update);
   }
 
   init() {}

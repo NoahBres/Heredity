@@ -24,4 +24,4 @@ export { Cerebrum };
 
 export { default as DnaViz } from "./viz/DnaViz";
 export { default as PerceptronViz } from "./viz/PerceptronViz";
-export { default as TopGenesViz } from "./viz/PerceptronViz";
+export { default as TopGenesViz } from "./viz/TopGenesViz";
