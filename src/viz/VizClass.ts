@@ -176,6 +176,9 @@ export class DnaPill {
       // TODO Optimize this. Update DOM rather than deleting and readding
       this._geneReps.forEach((e, i) => {
         e.className = `${this._baseClassName}-gene`;
+        if (this._alternativeClassName.length > 0) {
+          e.classList.add(`${this._alternativeClassName}-gene`);
+        }
         e.style.background = `hsl(${
           this._chromosome.getColorsHue()[i]
         },100%,60%)`;
