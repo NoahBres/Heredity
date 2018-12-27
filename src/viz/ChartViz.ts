@@ -9,6 +9,23 @@ export default class ChartViz implements VizClass {
   private _topFitnessData: number[] = [];
   private _fitnessData: number[] = [];
 
+  private testData = [
+    {
+      name: "Top Fitness",
+      values: [3, 5, 6, 6, 8]
+    },
+    {
+      name: "Fitness",
+      values: [3, 5, 6, 2, 8]
+    }
+  ];
+
+  private _xScale: d3.ScaleLinear<number, number> | undefined;
+  private _yScale: d3.ScaleLinear<number, number> | undefined;
+  private _zoomWindow:
+    | d3.Selection<SVGRectElement, {}, null, undefined>
+    | undefined;
+
   private _style = `
     .viz__chart-container {
       background: white;
@@ -65,43 +82,32 @@ export default class ChartViz implements VizClass {
     svg.attr("width", width + padding.left + padding.right);
     svg.attr("height", height + padding.top + padding.bottom);
 
-    const testData = [
-      {
-        name: "Top Fitness",
-        values: [3, 5, 6, 6, 8]
-      },
-      {
-        name: "Fitness",
-        values: [3, 5, 6, 2, 8]
-      }
-    ];
-
     const color = d3.scaleOrdinal(d3.schemeCategory10);
 
     const zoom = d3.zoom().on("zoom", onZoom);
 
-    const xExtent = this.findExtent(testData, "x");
-    const yExtent = this.findExtent(testData, "y");
+    const xExtent = this.findExtent(this.testData, "x");
+    const yExtent = this.findExtent(this.testData, "y");
 
-    const xScale = d3
+    this._xScale = d3
       .scaleLinear()
       .range([0, width])
       .domain(xExtent)
       .nice();
-    const yScale = d3
+    this._yScale = d3
       .scaleLinear()
       .range([height, 0])
       .domain(yExtent)
       .nice();
 
-    const xAxis = d3.axisBottom(xScale).ticks(12);
-    const yAxis = d3.axisLeft(yScale).ticks((12 * height) / width);
+    const xAxis = d3.axisBottom(this._xScale).ticks(12);
+    const yAxis = d3.axisLeft(this._yScale).ticks((12 * height) / width);
 
     const plotLine = d3
       .line()
       .curve(d3.curveMonotoneX)
-      .x(d => xScale((<any>d).x))
-      .y(d => yScale((<any>d).y));
+      .x(d => this._xScale!((<any>d).x))
+      .y(d => this._yScale!((<any>d).y));
 
     // make a clip path
     svg
@@ -112,7 +118,7 @@ export default class ChartViz implements VizClass {
       .attr("width", width)
       .attr("height", height);
 
-    const zoomWindow = svg
+    this._zoomWindow = svg
       .append("rect")
       .attr("clip-path", "url(#clip)")
       .attr("transform", `translate(${padding.left},${padding.top})`)
@@ -142,7 +148,7 @@ export default class ChartViz implements VizClass {
       .append("g")
       .attr("transform", `translate(${padding.left},${padding.top})`);
 
-    zoomWindow.call(<any>zoom);
+    this._zoomWindow.call(<any>zoom);
 
     function onZoom() {}
   }
@@ -162,7 +168,15 @@ export default class ChartViz implements VizClass {
     this.updated3();
   }
 
-  updated3() {}
+  updated3() {
+    const xExtent = this.findExtent(this.testData, "x");
+    const yExtent = this.findExtent(this.testData, "y");
+
+    this._xScale!.domain(xExtent).nice();
+    this._yScale!.domain(yExtent).nice();
+
+    const t = d3.zoomTransform((<any>this._zoomWindow).node());
+  }
 
   link(toLink: VizClass): boolean {
     return false;
