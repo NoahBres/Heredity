@@ -3,6 +3,7 @@ import { default as VizClass, injectStylesheet, DnaPill } from "./VizClass";
 import GenericChromosome from "../chromosomes/GenericChromosome";
 
 // TODO Move DNAPill to separate class
+// TODO Add animation to spawn
 
 export default class TopGeneViz implements VizClass {
   _heredity: Heredity;
@@ -18,6 +19,8 @@ export default class TopGeneViz implements VizClass {
     .viz__top-genes-container {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
+      
       padding: 1em;
       border: 1px solid #d0d0d0;
       border-radius: 0.3em;
@@ -112,7 +115,9 @@ export default class TopGeneViz implements VizClass {
     pillContainer.appendChild(generationText);
 
     const fitnessText = document.createElement("p");
-    fitnessText.innerText = `Fitness: ${topChromosome.fitness.toString()}`;
+    fitnessText.innerText = `Fitness: ${Math.floor(
+      topChromosome.fitness
+    ).toString()}`;
     fitnessText.classList.add("viz__top-genes-pill-container-fitness-text");
     pillContainer.appendChild(fitnessText);
 

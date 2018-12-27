@@ -9,6 +9,7 @@ import GenericChromosome from "../chromosomes/GenericChromosome";
 // Don't delete DOM on refresh
 // TODO Remove comments. Write TSDoc
 // TODO Move DNAPill to separate class
+// Optimize d3 imports
 
 export default class PerceptronViz implements VizClass {
   _heredity: Heredity;
