@@ -9,7 +9,7 @@ export default class ChartViz implements VizClass {
   private _topFitnessData: number[] = [];
   private _fitnessData: number[] = [];
 
-  private testData = [
+  private _data = [
     {
       name: "Top Fitness",
       values: [3, 5, 6, 6, 8]
@@ -20,11 +20,18 @@ export default class ChartViz implements VizClass {
     }
   ];
 
+  private _svg: d3.Selection<SVGSVGElement, {}, null, undefined> | undefined;
+  private _color = d3.scaleOrdinal(d3.schemeCategory10);
+  private _line: d3.Selection<SVGGElement, {}, null, undefined> | undefined;
+  private _dot: d3.Selection<SVGGElement, {}, null, undefined> | undefined;
   private _xScale: d3.ScaleLinear<number, number> | undefined;
   private _yScale: d3.ScaleLinear<number, number> | undefined;
   private _zoomWindow:
     | d3.Selection<SVGRectElement, {}, null, undefined>
     | undefined;
+  private _plotLine: d3.Line<[number, number]> | undefined;
+  private _xAxis: d3.Axis<number | { valueOf(): number }> | undefined;
+  private _yAxis: d3.Axis<number | { valueOf(): number }> | undefined;
 
   private _style = `
     .viz__chart-container {
@@ -74,20 +81,18 @@ export default class ChartViz implements VizClass {
       left: 50
     };
 
-    const svg = d3.select(this._parentElement).append("svg");
+    this._svg = d3.select(this._parentElement).append("svg");
     const width =
       this._parentElement.clientWidth - padding.left - padding.right;
     const height =
       this._parentElement.clientHeight - padding.top - padding.bottom;
-    svg.attr("width", width + padding.left + padding.right);
-    svg.attr("height", height + padding.top + padding.bottom);
-
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
+    this._svg.attr("width", width + padding.left + padding.right);
+    this._svg.attr("height", height + padding.top + padding.bottom);
 
     const zoom = d3.zoom().on("zoom", onZoom);
 
-    const xExtent = this.findExtent(this.testData, "x");
-    const yExtent = this.findExtent(this.testData, "y");
+    const xExtent = this.findExtent(this._data, "x");
+    const yExtent = this.findExtent(this._data, "y");
 
     this._xScale = d3
       .scaleLinear()
@@ -100,17 +105,17 @@ export default class ChartViz implements VizClass {
       .domain(yExtent)
       .nice();
 
-    const xAxis = d3.axisBottom(this._xScale).ticks(12);
-    const yAxis = d3.axisLeft(this._yScale).ticks((12 * height) / width);
+    this._xAxis = d3.axisBottom(this._xScale).ticks(12);
+    this._yAxis = d3.axisLeft(this._yScale).ticks((12 * height) / width);
 
-    const plotLine = d3
+    this._plotLine = d3
       .line()
       .curve(d3.curveMonotoneX)
       .x(d => this._xScale!((<any>d).x))
       .y(d => this._yScale!((<any>d).y));
 
     // make a clip path
-    svg
+    this._svg
       .append("defs")
       .append("clipPath")
       .attr("id", "clip")
@@ -118,7 +123,7 @@ export default class ChartViz implements VizClass {
       .attr("width", width)
       .attr("height", height);
 
-    this._zoomWindow = svg
+    this._zoomWindow = this._svg
       .append("rect")
       .attr("clip-path", "url(#clip)")
       .attr("transform", `translate(${padding.left},${padding.top})`)
@@ -127,24 +132,24 @@ export default class ChartViz implements VizClass {
       .style("opacity", 1)
       .style("fill", "whitesmoke");
 
-    svg
+    this._svg
       .append("g")
       .attr("class", "x axis")
       .attr("id", "axis--x")
       .attr("transform", `translate(${padding.left},${height + padding.top})`)
-      .call(xAxis);
+      .call(this._xAxis);
 
-    svg
+    this._svg
       .append("g")
       .attr("class", "y axis")
       .attr("transform", `translate(${padding.left},${padding.top})`)
       .attr("id", "axis--y")
-      .call(yAxis);
+      .call(this._yAxis);
 
-    const line = svg
+    this._line = this._svg
       .append("g")
       .attr("transform", `translate(${padding.left},${padding.top})`);
-    const dot = svg
+    this._dot = this._svg
       .append("g")
       .attr("transform", `translate(${padding.left},${padding.top})`);
 
@@ -169,13 +174,109 @@ export default class ChartViz implements VizClass {
   }
 
   updated3() {
-    const xExtent = this.findExtent(this.testData, "x");
-    const yExtent = this.findExtent(this.testData, "y");
+    const remove = (sel: any, index: any, name: any) => {};
+
+    const xExtent = this.findExtent(this._data, "x");
+    const yExtent = this.findExtent(this._data, "y");
 
     this._xScale!.domain(xExtent).nice();
     this._yScale!.domain(yExtent).nice();
 
     const t = d3.zoomTransform((<any>this._zoomWindow).node());
+    const newXScale = t.rescaleY(<any>this._xScale);
+    const newYScale = t.rescaleY(<any>this._yScale);
+
+    this._plotLine = d3
+      .line()
+      .curve(d3.curveMonotoneX)
+      .x((d: any) => newXScale(d.x))
+      .y((d: any) => newYScale(d.y));
+
+    this._xAxis!.scale(newXScale);
+    this._yAxis!.scale(newYScale);
+
+    this._svg!.transition()
+      .duration(750)
+      .select(".x.axis")
+      .call(<any>this._xAxis);
+    this._svg!.transition()
+      .duration(750)
+      .select(".y.axis")
+      .call(<any>this._yAxis);
+
+    // Add and update to plot data
+    this._data.forEach((d, i) => {
+      if (d3.select(`#line-${i}`).empty()) {
+        // Add new charts
+        // Add line plot
+        this._line!.append("g")
+          .attr("id", `line-${i}`)
+          .attr("clip-path", "url(#clip)")
+          .append("path")
+          .data([d.values])
+          .attr("class", "pointlines")
+          .attr("d", <any>this._plotLine)
+          .style("fill", "none")
+          .style("stroke", () => ((<any>d).color = this._color((<any>d).key)));
+
+        // this._dot!.append("g")
+        //   .attr("id", `scatter-${i}`)
+        //   .attr("clip-path", "url(#clip)")
+        //   .selectAll(".dot")
+        //   .data(d.values)
+        //   .enter()
+        //   .append("circle")
+        //   .attr("class", "dot")
+        //   .attr("r", 5)
+        //   .attr("cx", d => newXScale((<any>d).x))
+        //   .attr("cy", d => newYScale((<any>d).y))
+        //   .attr("stroke", "white")
+        //   .attr("stroke-width", "2px")
+        //   .style("fill", () => ((<any>d).color = this._color((<any>d).key)))
+        //   .on("click", function(d, i) {
+        //     const s = d3.select(this);
+        //     remove(s, i, (<any>d).name);
+        //   });
+      } else {
+        const lineSelect = this._line!.select(`#line-${i}`)
+          .select("path")
+          .data([d.values]);
+
+        lineSelect
+          .transition()
+          .duration(750)
+          .attr("d", <any>this._plotLine);
+
+        // const scatterSelect = this._dot!.select(`#scatter-${i}`)
+        //   .selectAll("circle")
+        //   .data((<any>d).values);
+
+        // scatterSelect
+        //   .transition()
+        //   .duration(750)
+        //   .attr("cx", d => newXScale((<any>d).x))
+        //   .attr("cy", d => newYScale((<any>d).y))
+        //   .attr("stroke", "white")
+        //   .attr("stroke-width", "2px")
+        //   .style("fill", () => ((<any>d).color = this._color((<any>d).key)));
+
+        // scatterSelect
+        //   .enter()
+        //   .append("circle")
+        //   .attr("cx", d => newXScale((<any>d).x))
+        //   .attr("cy", d => newYScale((<any>d).y))
+        //   .attr("r", 5)
+        //   .attr("stroke", "white")
+        //   .attr("stroke-width", "2px")
+        //   .style("fill", () => ((<any>d).color = this._color((<any>d).key)))
+        //   .on("click", function(d, i) {
+        //     const s = d3.select(this);
+        //     remove(s, i, (<any>d).name);
+        //   });
+
+        // scatterSelect.exit().remove();
+      }
+    });
   }
 
   link(toLink: VizClass): boolean {
