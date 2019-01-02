@@ -5,6 +5,7 @@ import { exit } from "shelljs";
 
 // TODO Move stuff to constructor so it doesn't need to be undefined
 // TODO Then remove the possibly undefined question marks
+// TODO Rid of all D3. All of it. ALL OF IT
 
 export default class ChartViz implements VizClass {
   _heredity: Heredity;
@@ -25,10 +26,17 @@ export default class ChartViz implements VizClass {
 
   private _svg: d3.Selection<SVGSVGElement, {}, null, undefined> | undefined;
   private _plotLine: d3.Line<[number, number]> | undefined;
+  private _plotLineTopFitness: d3.Line<[number, number]> | undefined;
   private _line:
     | d3.Selection<SVGPathElement, { y: number }[], null, undefined>
     | undefined;
+  private _lineTopFitness:
+    | d3.Selection<SVGPathElement, { y: number }[], null, undefined>
+    | undefined;
   private _dot:
+    | d3.Selection<SVGCircleElement, { y: number }, SVGGElement, {}>
+    | undefined;
+  private _dotTopFitness:
     | d3.Selection<SVGCircleElement, { y: number }, SVGGElement, {}>
     | undefined;
   private _xScale: d3.ScaleLinear<number, number> | undefined;
@@ -38,11 +46,41 @@ export default class ChartViz implements VizClass {
 
   private _style = `
     .viz__chart-container {
+      display: flex;
+      flex-direction: column-reverse;
+      
       background: white;
       border-radius: 0.3em;
       border: 1px solid #d0d0d0;
-
+      
       position: relative;
+    }
+    
+    .viz__chart-container .legend-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .viz__chart-container .legend-color {
+      height: 0.5em;
+      width: 0.5em;
+      
+      margin: 0 0.45em;
+      margin-top: 0.2em;
+      margin-left: 1em;
+      
+      background: red;
+
+      border-radius: 0.15em;
+    }
+    
+    .viz__chart-container .legend-color.yellow {
+      background: #f5a623;
+    }
+    
+    .viz__chart-container .legend-color.blue {
+      background: #0076ff;
     }
 
     .viz__chart-container .line {
@@ -51,20 +89,30 @@ export default class ChartViz implements VizClass {
       stroke-width: 3;
     }
     
+    .viz__chart-container .line.blue {
+      stroke: #0076ff;
+    }
+
     .viz__chart-container .overlay {
       fill: none;
       pointer-events: all;
     }
     
     .viz__chart-container .dot {
-      fill: #ffab00;
+      fill: #f5a623;
       stroke: #fff;
+
+      transition: 300ms ease;
+    }
+    
+    .viz__chart-container .dot.blue {
+      fill: #0076ff;
     }
 
     .viz__chart-container .dot:hover {
       cursor: pointer;
-      fill: blue;
-      stroke: steelblue;
+      fill: #ff0080;
+      stroke: #fff;
     }
   `;
 
@@ -93,6 +141,27 @@ export default class ChartViz implements VizClass {
       this.update();
       return;
     }
+
+    const legendContainer = document.createElement("div");
+    legendContainer.classList.add("legend-container");
+
+    const fitnessLegend = document.createElement("p");
+    const topFitnessLegend = document.createElement("p");
+    fitnessLegend.innerText = "Fitness";
+    topFitnessLegend.innerText = "Top Fitness";
+
+    const fitnessColor = document.createElement("div");
+    const topFitnessColor = document.createElement("div");
+    fitnessColor.classList.add("legend-color");
+    fitnessColor.classList.add("yellow");
+    topFitnessColor.classList.add("legend-color");
+    topFitnessColor.classList.add("blue");
+
+    legendContainer.appendChild(fitnessColor);
+    legendContainer.appendChild(fitnessLegend);
+    legendContainer.appendChild(topFitnessColor);
+    legendContainer.appendChild(topFitnessLegend);
+    this._parentElement.appendChild(legendContainer);
 
     this.initd3();
 
@@ -127,15 +196,15 @@ export default class ChartViz implements VizClass {
       .attr("width", width)
       .attr("height", height);
 
-    const zoomWindow = this._svg
-      .append("rect")
-      .attr("clip-path", 'url("#clip)')
-      .attr("transform", `translate(${0},${0})`)
-      .attr("width", width)
-      .attr("height", height)
-      .style("opacity", 1)
-      .style("fill", "whitesmoke")
-      .attr("transform", `translate(${padding.left},${padding.top})`);
+    // const zoomWindow = this._svg
+    //   .append("rect")
+    //   .attr("clip-path", 'url("#clip)')
+    //   .attr("transform", `translate(${0},${0})`)
+    //   .attr("width", width)
+    //   .attr("height", height)
+    //   .style("opacity", 1)
+    //   .style("fill", "whitesmoke")
+    //   .attr("transform", `translate(${padding.left},${padding.top})`);
 
     // const xExtent = [1, this._data.fitness.values.length];
     // const yExtent = [
@@ -172,6 +241,12 @@ export default class ChartViz implements VizClass {
       .x((d, i) => this._xScale!(i + 1))
       .y((d: any) => this._yScale!(d.y));
 
+    this._plotLineTopFitness = d3
+      .line()
+      .curve(d3.curveMonotoneX)
+      .x((d, i) => this._xScale!(i + 1))
+      .y((d: any) => this._yScale!(d.y));
+
     this._svg
       .append("g")
       .attr("class", "x axis")
@@ -192,6 +267,14 @@ export default class ChartViz implements VizClass {
       .attr("class", "line")
       .attr("d", <any>this._plotLine);
 
+    this._lineTopFitness = this._svg
+      .append("g")
+      .attr("transform", `translate(${padding.left},${padding.top})`)
+      .append("path")
+      .datum(this._data.topFitness.values)
+      .attr("class", "line blue")
+      .attr("d", <any>this._plotLineTopFitness);
+
     // this._svg
     //   .append("g")
     //   // .attr(
@@ -211,6 +294,20 @@ export default class ChartViz implements VizClass {
       .enter()
       .append("circle")
       .attr("class", "dot")
+      .attr("cx", (d, i) => {
+        return this._xScale!(i + 1);
+      })
+      .attr("cy", d => this._yScale!(d.y))
+      .attr("r", 5);
+
+    this._dotTopFitness = this._svg
+      .append("g")
+      .attr("transform", `translate(${padding.left},${padding.top})`)
+      .selectAll(".dot")
+      .data(this._data.topFitness.values)
+      .enter()
+      .append("circle")
+      .attr("class", "dot blue")
       .attr("cx", (d, i) => {
         return this._xScale!(i + 1);
       })
@@ -279,6 +376,12 @@ export default class ChartViz implements VizClass {
       .x((d, i) => this._xScale!(i + 1))
       .y((d: any) => this._yScale!(d.y));
 
+    this._plotLineTopFitness = d3
+      .line()
+      .curve(d3.curveMonotoneX)
+      .x((d, i) => this._xScale!(i + 1))
+      .y((d: any) => this._yScale!(d.y));
+
     const transition = d3.transition().duration(300);
     this._svg!.select(".x")
       .transition(<any>transition)
@@ -288,6 +391,10 @@ export default class ChartViz implements VizClass {
       .call(<any>this._yAxis);
 
     this._line!.datum(this._data.fitness.values)
+      // .transition(<any>transition)
+      .attr("d", <any>this._plotLine);
+
+    this._lineTopFitness!.datum(this._data.topFitness.values)
       // .transition(<any>transition)
       .attr("d", <any>this._plotLine);
 
@@ -327,6 +434,19 @@ export default class ChartViz implements VizClass {
     // })
     // .exit()
     // .remove();
+
+    this._dotTopFitness!.data(this._data.topFitness.values)
+      .enter()
+      .append("circle")
+      .merge(<any>this._dotTopFitness)
+      .attr("class", "dot blue")
+      .attr("cx", (d, i) => {
+        return this._xScale!(i + 1);
+      })
+      .attr("cy", d => this._yScale!(d.y))
+      .attr("r", 5)
+      .exit()
+      .remove();
 
     // Object.keys(this._data).forEach((d, i) => {
     //   if (d3.select(`#line${i}`).empty()) {
