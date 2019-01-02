@@ -13,11 +13,11 @@ export default class ChartViz implements VizClass {
   private _data: ChartDataType = {
     topFitness: {
       name: "Top Fitness",
-      values: [5, 9, 14, 14, 20]
+      values: []
     },
     fitness: {
       name: "Fitness",
-      values: [5, 9, 14, 4, 20]
+      values: []
     }
   };
 
@@ -137,11 +137,19 @@ export default class ChartViz implements VizClass {
       .style("fill", "whitesmoke")
       .attr("transform", `translate(${padding.left},${padding.top})`);
 
-    const xExtent = [1, this._data.fitness.values.length];
-    const yExtent = [
-      d3.min(this._data.fitness.values),
-      d3.max(this._data.fitness.values)
-    ];
+    // const xExtent = [1, this._data.fitness.values.length];
+    // const yExtent = [
+    //   this._data.fitness.values.reduce(
+    //     (min, p) => (p.y < min ? p.y : min),
+    //     this._data.fitness.values[0].y
+    //   ),
+    //   this._data.fitness.values.reduce(
+    //     (max, p) => (p.y > max ? p.y : max),
+    //     this._data.fitness.values[0].y
+    //   )
+    // ];
+    const xExtent = [0, 1];
+    const yExtent = [0, 100];
 
     this._xScale = d3
       .scaleLinear()
@@ -180,13 +188,7 @@ export default class ChartViz implements VizClass {
       .append("g")
       .attr("transform", `translate(${padding.left},${padding.top})`)
       .append("path")
-      .datum(
-        this._data.fitness.values.map(i => {
-          return {
-            y: i
-          };
-        })
-      )
+      .datum(this._data.fitness.values)
       .attr("class", "line")
       .attr("d", <any>this._plotLine);
 
@@ -205,13 +207,7 @@ export default class ChartViz implements VizClass {
       .append("g")
       .attr("transform", `translate(${padding.left},${padding.top})`)
       .selectAll(".dot")
-      .data(
-        this._data.fitness.values.map(i => {
-          return {
-            y: i
-          };
-        })
-      )
+      .data(this._data.fitness.values)
       .enter()
       .append("circle")
       .attr("class", "dot")
@@ -220,6 +216,8 @@ export default class ChartViz implements VizClass {
       })
       .attr("cy", d => this._yScale!(d.y))
       .attr("r", 5);
+
+    // this._dot = this._svg.selectAll(".dot");
     // .on("mouseover", function(a, b, c) {
     //   d3.select(this).classed("focus", true);
     // })
@@ -243,12 +241,15 @@ export default class ChartViz implements VizClass {
       this._heredity.history.length - 1
     ].topChromosome().fitness;
 
-    this._data.fitness.values.push(latestFitness);
+    this._data.fitness.values.push({ y: latestFitness });
     const topFitness =
-      this._data.fitness.values.length === 0
+      this._data.topFitness.values.length === 0
         ? 0
-        : this._data.topFitness.values[this._data.topFitness.values.length - 1];
-    this._data.topFitness.values.push(Math.max(latestFitness, topFitness));
+        : this._data.topFitness.values[this._data.topFitness.values.length - 1]
+            .y;
+    this._data.topFitness.values.push({
+      y: Math.max(latestFitness, topFitness)
+    });
 
     this.updated3();
   }
@@ -256,8 +257,14 @@ export default class ChartViz implements VizClass {
   updated3() {
     const xExtent = [1, this._data.fitness.values.length];
     const yExtent = [
-      d3.min(this._data.fitness.values),
-      d3.max(this._data.fitness.values)
+      this._data.fitness.values.reduce(
+        (min, p) => (p.y < min ? p.y : min),
+        this._data.fitness.values[0].y
+      ),
+      this._data.fitness.values.reduce(
+        (max, p) => (p.y > max ? p.y : max),
+        this._data.fitness.values[0].y
+      )
     ];
 
     this._xScale!.domain(xExtent).nice();
@@ -280,37 +287,27 @@ export default class ChartViz implements VizClass {
       .transition(<any>transition)
       .call(<any>this._yAxis);
 
-    this._line!.datum(
-      this._data.fitness.values.map(i => {
-        return {
-          y: i
-        };
-      })
-    )
-      .transition(<any>transition)
+    this._line!.datum(this._data.fitness.values)
+      // .transition(<any>transition)
       .attr("d", <any>this._plotLine);
 
-    this._dot!.data(
-      this._data.fitness.values.map(i => {
-        return {
-          y: i
-        };
-      })
-    )
-      .transition()
-      .duration(300)
-      .attr("cx", (d, i) => {
-        return this._xScale!(i + 1);
-      })
-      .attr("cy", d => this._yScale!(d.y));
+    // this._dot!.data(
+    //   this._data.fitness.values.map(i => {
+    //     return {
+    //       y: i
+    //     };
+    //   })
+    // )
+    //   .transition()
+    //   .duration(300)
+    //   .attr("cx", (d, i) => {
+    //     return this._xScale!(i + 1);
+    //   })
+    //   .attr("cy", d => this._yScale!((<any>d).y));
 
-    this._dot!.data(
-      this._data.fitness.values.map(i => {
-        return {
-          y: i
-        };
-      })
-    )
+    this._svg!.selectAll(".dot").remove();
+
+    this._dot!.data(this._data.fitness.values)
       .enter()
       .append("circle")
       .merge(<any>this._dot)
@@ -320,14 +317,16 @@ export default class ChartViz implements VizClass {
       })
       .attr("cy", d => this._yScale!(d.y))
       .attr("r", 5)
-      // .on("mouseover", function(a, b, c) {
-      //   d3.select(this).classed("focus", true);
-      // })
-      // .on("mouseout", function(a, b, c) {
-      //   d3.select(this).classed("focus", false);
-      // })
       .exit()
       .remove();
+    // .on("mouseover", function(a, b, c) {
+    //   d3.select(this).classed("focus", true);
+    // })
+    // .on("mouseout", function(a, b, c) {
+    //   d3.select(this).classed("focus", false);
+    // })
+    // .exit()
+    // .remove();
 
     // Object.keys(this._data).forEach((d, i) => {
     //   if (d3.select(`#line${i}`).empty()) {
@@ -362,5 +361,5 @@ interface ChartDataType {
 
 interface ChartDataFitnessType {
   name: string;
-  values: number[];
+  values: { y: number }[];
 }
