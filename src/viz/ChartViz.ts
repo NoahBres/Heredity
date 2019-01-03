@@ -1,7 +1,6 @@
 import Heredity from "../Heredity";
 import { default as VizClass, injectStylesheet } from "./VizClass";
 import * as d3 from "d3";
-import { exit } from "shelljs";
 
 // TODO Move stuff to constructor so it doesn't need to be undefined
 // TODO Then remove the possibly undefined question marks
@@ -101,6 +100,8 @@ export default class ChartViz implements VizClass {
     .viz__chart-container .dot {
       fill: #f5a623;
       stroke: #fff;
+      
+      position: relative;
 
       transition: 300ms ease;
     }
@@ -108,7 +109,7 @@ export default class ChartViz implements VizClass {
     .viz__chart-container .dot.blue {
       fill: #0076ff;
     }
-
+  
     .viz__chart-container .dot:hover {
       cursor: pointer;
       fill: #ff0080;

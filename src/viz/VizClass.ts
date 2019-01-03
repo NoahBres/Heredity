@@ -1,6 +1,8 @@
 import { default as Heredity } from "../Heredity";
 import GenericChromosome from "../chromosomes/GenericChromosome";
-import NeuralChromosome from "../chromosomes/NeuralChromosome";
+
+const cssPrefix = "heredity-viz__";
+export { cssPrefix };
 
 export default interface VizClass {
   readonly _heredity: Heredity;
