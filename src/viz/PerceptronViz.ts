@@ -14,8 +14,8 @@ export default class PerceptronViz implements VizClass {
   _heredity: Heredity;
   _parentElement: HTMLElement;
 
-  private _chromosome: NeuralChromosome | undefined;
-  private _lastChromosome: NeuralChromosome | undefined;
+  private _chromosome?: NeuralChromosome;
+  private _lastChromosome?: NeuralChromosome;
   private _options: {
     index?: number;
     chromosome?: NeuralChromosome;
@@ -33,12 +33,12 @@ export default class PerceptronViz implements VizClass {
 
   private _deadIndicatorElement: HTMLElement;
 
-  private _dnaPill: DnaPill | undefined;
+  private _dnaPill?: DnaPill;
   private readonly _dnaPillClassName = `${cssPrefix}perceptron-viz-dna-pill`;
 
   private readonly _containerClassName = "perceptron-container";
 
-  private _canvas: SVG.Doc | undefined;
+  private _canvas?: SVG.Doc;
   private readonly _canvasId = `${cssPrefix}perceptron-viz-canvas`;
 
   private _drawingNodes: NeuralNode[] = [];
