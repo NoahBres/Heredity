@@ -15,6 +15,7 @@ export default class PerceptronViz implements VizClass {
   _parentElement: HTMLElement;
 
   private _chromosome: NeuralChromosome | undefined;
+  private _lastChromosome: NeuralChromosome | undefined;
   private _options: {
     index?: number;
     chromosome?: NeuralChromosome;
@@ -179,6 +180,8 @@ export default class PerceptronViz implements VizClass {
       );
     }
 
+    this._lastChromosome = this._chromosome;
+
     if (!this._chromosome.tags.has("dead")) {
       this._deadIndicatorElement.classList.add("hidden");
     } else {
@@ -188,7 +191,11 @@ export default class PerceptronViz implements VizClass {
     this._dnaPill = new DnaPill(this._chromosome, this._dnaPillClassName);
     this._parentElement.appendChild(this._dnaPill.element);
 
-    this._chromosome!.onCompute(this._chromosome, () => {
+    this._chromosome.onCompute(this._chromosome, () => {
+      this.updateSVG();
+    });
+
+    this._chromosome.tags.onChange(this._chromosome, () => {
       this.update();
     });
 
@@ -201,6 +208,24 @@ export default class PerceptronViz implements VizClass {
     }
 
     this._canvas = SVG(this._canvasId);
+
+    // Links must be declared before nodes since they're drawn in the constructor
+    // TODO Optimize this by moving this to buildGraph()
+    this._graph.links.forEach(n => {
+      const target = this._graph.nodes.find(e => e.id === n.target);
+      const source = this._graph.nodes.find(e => e.id === n.source);
+      this._drawingLinks.push(
+        new NeuralNodeLink({
+          x1: target!.x,
+          y1: target!.y,
+          x2: source!.x,
+          y2: source!.y,
+          strokeWidth: 2,
+          color: "#999",
+          draw: this._canvas!
+        })
+      );
+    });
 
     // TODO Optimize and move this to buildGraph()
     this._graph.nodes.forEach((n, i) => {
@@ -229,35 +254,74 @@ export default class PerceptronViz implements VizClass {
       );
     });
 
-    // console.log(this._graph);
-    // TODO Optimize this by moving this to buildGraph()
-    this._graph.links.forEach(n => {
-      const target = this._graph.nodes.find(e => e.id === n.target);
-      const source = this._graph.nodes.find(e => e.id === n.source);
-      this._drawingLinks.push(
-        new NeuralNodeLink({
-          x1: target!.x,
-          y1: target!.y,
-          x2: source!.x,
-          y2: source!.y,
-          strokeWidth: 2,
-          color: "#999",
-          draw: this._canvas!
-        })
-      );
-    });
-
-    this._drawingLinks.forEach(n => n.draw());
-    this._drawingNodes.forEach(n => n.draw());
-
-    this.update();
+    this.updateSVG();
 
     this._parentElement.dataset.initialized = "true";
   }
 
   update() {
-    // this._drawingLinks.forEach(n => n.draw());
-    // this._drawingNodes.forEach(n => n.draw());
+    if (this._options.chromosome !== undefined) {
+      this._chromosome = this._options.chromosome;
+      this._options.chromosome = undefined;
+    } else {
+      this._chromosome = <NeuralChromosome>(
+        this._heredity.chromosomes[this._options.index!]
+      );
+    }
+
+    if (this._lastChromosome !== this._chromosome) {
+      this._chromosome!.onCompute(this._chromosome, () => {
+        this.updateSVG();
+      });
+
+      this._chromosome.tags.onChange(this._chromosome, () => {
+        this.update();
+      });
+    }
+
+    if (!this._chromosome.tags.has("dead")) {
+      this._deadIndicatorElement.classList.add("hidden");
+    } else {
+      this._deadIndicatorElement.classList.remove("hidden");
+    }
+
+    this._dnaPill!.setChromosome(this._chromosome);
+    this._dnaPill!.update();
+
+    this.updateSVG();
+  }
+
+  updateSVG() {
+    this._graph = this.buildGraph(
+      this._chromosome!,
+      this.genGraphCoords(this._chromosome!)
+    );
+
+    this._graph.nodes.forEach((n, i) => {
+      this._drawingNodes[i].value = n.value;
+    });
+
+    if (this._options.threshhold) {
+      const outputNeuronCount = this._chromosome!.cerebrum.layers[
+        this._chromosome!.cerebrum.layers.length - 1
+      ].neurons.length;
+
+      // Move this to the for loop 10 lines up to optimize so there isn't an extra loop
+      this._graph.nodes
+        .slice(this._graph.nodes.length - outputNeuronCount)
+        .forEach((n, i) => {
+          const index = this._graph.nodes.length - outputNeuronCount + i;
+          const threshold = this._options.threshhold!.apply(null, [n.value]);
+          this._drawingNodes[index].strokeColor = threshold
+            ? "#660090"
+            : "#fff";
+          this._drawingNodes[index].strokeWidth = threshold ? 2 : 4;
+        });
+    }
+
+    this._graph.links.forEach((n, i) => {
+      this._drawingLinks[i].value = n.value;
+    });
   }
 
   buildGraph(chrom: NeuralChromosome, graphCoords: number[][]): GraphInterface {
@@ -383,7 +447,7 @@ export default class PerceptronViz implements VizClass {
         // this._options.index = undefined;
         this.init();
         this._chromosome!.onCompute(this._chromosome, () => {
-          this.update();
+          this.updateSVG();
         });
       });
 
@@ -399,7 +463,16 @@ class NeuralNode {
   private _y: number;
   private _radius: number;
   private _color: string;
+  private _strokeColor: string;
+  private _strokeWidth: number;
+
   private _draw: SVG.Doc;
+  private _text: SVG.Text;
+  private _node: SVG.Circle;
+
+  private _value = 0;
+
+  private truncateLength = 5;
 
   constructor({
     x,
@@ -420,10 +493,10 @@ class NeuralNode {
     this._color = color;
     this._draw = draw;
 
-    // this.draw();
-  }
+    this._strokeColor = "#fff";
+    this._strokeWidth = 4;
 
-  draw() {
+    // this.draw();
     // this._draw
     //   .circle(this._radius)
     //   .fill(this._color)
@@ -443,21 +516,49 @@ class NeuralNode {
     const group = this._draw.group();
     group.move(this._x, this._y);
 
-    const circle = this._draw
+    this._node = this._draw
       .circle(this._radius)
       .fill(this._color)
-      .stroke({ color: "#fff", opacity: 1, width: 4 })
+      .stroke({
+        color: this._strokeColor,
+        opacity: 1,
+        width: this._strokeWidth
+      })
       .move(-this._radius / 2, -this._radius / 2);
 
-    const text = this._draw
-      .text("test")
-      .font({ size: 15, anchor: "middle" })
+    this._text = this._draw
+      .plain("test")
+      .font({ size: 12, anchor: "middle" })
       .cy(0);
-    group.add(circle);
-    group.add(text);
+    group.add(this._node);
+    group.add(this._text);
   }
 
-  update() {}
+  set value(value: number) {
+    const lastVal = this._value;
+    this._value = value;
+    if (lastVal !== value) {
+      this._text.plain(
+        `${this._value.toString().substring(0, this.truncateLength)}...`
+      );
+    }
+  }
+
+  set strokeColor(color: string) {
+    const lastColor = this._strokeColor;
+    this._strokeColor = color;
+    if (lastColor !== color) {
+      this._node.animate(80).attr({ stroke: color });
+    }
+  }
+
+  set strokeWidth(width: number) {
+    const lastWidth = this._strokeWidth;
+    this._strokeWidth = width;
+    if (lastWidth !== width) {
+      this._node.animate(80).attr({ "stroke-width": width });
+    }
+  }
 }
 
 class NeuralNodeLink {
@@ -467,7 +568,14 @@ class NeuralNodeLink {
   private _y2: number;
   private _strokeWidth: number;
   private _color: string;
+
   private _draw: SVG.Doc;
+  private _line: SVG.Line;
+  private _text: SVG.Text;
+
+  private _value = 0;
+
+  private _truncateLength = 10;
 
   constructor({
     x1,
@@ -495,29 +603,46 @@ class NeuralNodeLink {
     this._draw = draw;
 
     // this.draw();
-  }
 
-  draw() {
-    const group = this._draw.group().move(this._x1, this._y1);
+    const midpoint = {
+      x: (this._x1 + this._x2) / 2,
+      y: (this._y1 + this._y2) / 2
+    };
+
+    const rotate =
+      (Math.atan2(this._y2 - this._y1, this._x2 - this._x1) * 180) / Math.PI;
+
+    // const group = this._draw.group().move(this._x1, this._y1);
     // .move(Math.min(this._x1, this._x2), Math.min(this._y1, this._y2));
 
-    const line = this._draw
-      // .line(this._x1, this._y1, this._x2, this._y2)
-      .line(0, 0, this._x2 - this._x1, this._y2 - this._y1)
+    this._line = this._draw
+      .line(this._x1, this._y1, this._x2, this._y2)
+      // .line(0, 0, this._x2 - this._x1, this._y2 - this._y1)
       .stroke({ color: this._color, width: this._strokeWidth, opacity: 0.6 });
 
     // console.log({ x1: this._x1, x2: this._x2, y1: this._y1, y2: this._y2 });
 
-    const text = this._draw
-      .text("test 2")
-      .font({ size: 15, anchor: "middle" })
-      .x(Math.abs(this._x1 - this._x2) / 2);
+    this._text = this._draw
+      .plain("test 2")
+      .font({ size: 13, anchor: "middle" })
+      .move(midpoint.x, midpoint.y - 8)
+      .rotate(rotate);
 
-    group.add(line);
-    group.add(text);
+    // .x(Math.abs(this._x1 - this._x2) / 2);
+
+    // group.add(line);
+    // group.add(text);
   }
 
-  update() {}
+  set value(value: number) {
+    const lastVal = this._value;
+    this._value = value;
+    if (lastVal !== value) {
+      this._text.plain(
+        `${this._value.toString().substring(0, this._truncateLength)}...`
+      );
+    }
+  }
 }
 
 interface GraphNodeInterface {
