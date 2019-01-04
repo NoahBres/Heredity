@@ -28,7 +28,6 @@ export default class TopGeneViz implements VizClass {
       background: white;
 
       max-height: 400px;
-      overflow-y: auto;
       flex-direction: row;
     }
 
