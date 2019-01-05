@@ -107,7 +107,7 @@ export default class TopGeneViz implements VizClass {
     pillContainer.appendChild(dp.element);
 
     const generationText = document.createElement("p");
-    generationText.innerText = `Gen: ${this._heredity.history.length}`;
+    generationText.innerText = `Gen: ${this._heredity.history.length - 1}`;
     generationText.classList.add(
       "viz__top-genes-pill-container-generation-text"
     );
