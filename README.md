@@ -9,6 +9,8 @@
 
 ## Todo v1.5
 
+- Resize listener on SVG visualizations
+- Replace all viz css classes with the cssPrefix
 - Fix perceptron viz death switch to another gene issue
 - Add animations to visualizations
 
