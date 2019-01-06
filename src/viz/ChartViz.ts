@@ -11,10 +11,29 @@ export default class ChartViz implements VizClass {
   private _canvas?: SVG.Doc;
   private readonly _canvasId = `${cssPrefix}chart-viz-canvas`;
 
-  private _axisXLine?: SVG.Line;
-  private _axisYLine?: SVG.Line;
+  private _axisXLine?: SVG.Rect;
+  private _axisYLine?: SVG.Rect;
 
   private _axisStrokeWidth = 1;
+
+  private _xAxisTicks: XAxisTick[] = [];
+
+  private _margin?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+
+  private _bounds?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+
+  private _graphWidth = 0;
+  private _graphHeight = 0;
 
   private _chartData: ChartDataType = {
     topFitness: {
@@ -103,33 +122,33 @@ export default class ChartViz implements VizClass {
       return;
     }
 
-    const margin = {
+    this._margin = {
       top: 30,
       right: 50,
       bottom: 30,
       left: 50
     };
 
-    const bounds = {
-      top: margin.top,
-      right: this._parentElement.clientWidth - margin.left,
-      bottom: this._parentElement.clientHeight - margin.bottom,
-      left: margin.left
+    this._bounds = {
+      top: this._margin.top,
+      right: this._parentElement.clientWidth - this._margin.left,
+      bottom: this._parentElement.clientHeight - this._margin.bottom,
+      left: this._margin.left
     };
 
-    const graphWidth = bounds.right - bounds.left;
-    const graphHeight = bounds.bottom - bounds.top;
+    this._graphWidth = this._bounds.right - this._bounds.left;
+    this._graphHeight = this._bounds.bottom - this._bounds.top;
 
     this._canvas = SVG(this._canvasId);
 
     this._axisXLine = this._canvas
-      .line(bounds.left, bounds.bottom, bounds.right, bounds.bottom)
-      .stroke({ color: "#4c4c4c", width: this._axisStrokeWidth });
+      .rect(this._bounds.right - this._bounds.left, this._axisStrokeWidth)
+      .fill("#4c4c4c")
+      .move(this._bounds.left, this._bounds.bottom);
     this._axisYLine = this._canvas
-      .line(bounds.left, bounds.top, bounds.left, bounds.bottom)
-      .stroke({ color: "#4c4c4c", width: this._axisStrokeWidth });
-
-    new XAxisTick(bounds.right, bounds.bottom, 6, "0.4", this._canvas);
+      .rect(this._axisStrokeWidth, this._bounds.bottom - this._bounds.top)
+      .fill("#4c4c4c")
+      .move(this._bounds.left, this._bounds.top);
 
     // const legendContainer = document.createElement("div");
     // legendContainer.classList.add("legend-container");
@@ -172,6 +191,19 @@ export default class ChartViz implements VizClass {
     this._chartData.topFitness.values.push(Math.max(latestFitness, topFitness));
 
     const xMax = this._chartData.fitness.values.length - 1;
+    this._xAxisTicks.forEach((n, i) => {
+      n.x = (i / xMax) * this._graphWidth + this._bounds!.left;
+    });
+
+    this._xAxisTicks.push(
+      new XAxisTick(
+        this._bounds!.right,
+        this._bounds!.bottom,
+        6,
+        (this._chartData.fitness.values.length - 1).toString(),
+        this._canvas!
+      )
+    );
 
     for (const key in this._chartData) {
       const chartObj = this._chartData[key];
@@ -235,6 +267,11 @@ class XAxisTick extends AxisTick {
 
     this._group.add(line);
     this._group.add(text);
+  }
+
+  set x(x: number) {
+    this._x = x + this._width;
+    this._group!.animate(300, ">").x(this._x);
   }
 }
 
