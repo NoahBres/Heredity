@@ -1,50 +1,36 @@
 import Heredity from "../Heredity";
-import { default as VizClass, injectStylesheet } from "./VizClass";
-import * as d3 from "d3";
-
-// TODO Move stuff to constructor so it doesn't need to be undefined
-// TODO Then remove the possibly undefined question marks
-// TODO Rid of all D3. All of it. ALL OF IT
+import { default as VizClass, injectStylesheet, cssPrefix } from "./VizClass";
+import * as SVG from "svg.js";
 
 export default class ChartViz implements VizClass {
   _heredity: Heredity;
   _parentElement: HTMLElement;
 
-  private _data: ChartDataType = {
+  private readonly _containerClassName = "chart-container";
+
+  private _canvas?: SVG.Doc;
+  private readonly _canvasId = `${cssPrefix}chart-viz-canvas`;
+
+  private _axisXLine?: SVG.Line;
+  private _axisYLine?: SVG.Line;
+
+  private _axisStrokeWidth = 1;
+
+  private _chartData: ChartDataType = {
     topFitness: {
       name: "Top Fitness",
-      values: []
+      values: [],
+      lineColor: "#f5a623"
     },
     fitness: {
       name: "Fitness",
-      values: []
+      values: [],
+      lineColor: "0076ff"
     }
   };
 
-  private _color = d3.scaleOrdinal(d3.schemeCategory10);
-
-  private _svg: d3.Selection<SVGSVGElement, {}, null, undefined> | undefined;
-  private _plotLine: d3.Line<[number, number]> | undefined;
-  private _plotLineTopFitness: d3.Line<[number, number]> | undefined;
-  private _line:
-    | d3.Selection<SVGPathElement, { y: number }[], null, undefined>
-    | undefined;
-  private _lineTopFitness:
-    | d3.Selection<SVGPathElement, { y: number }[], null, undefined>
-    | undefined;
-  private _dot:
-    | d3.Selection<SVGCircleElement, { y: number }, SVGGElement, {}>
-    | undefined;
-  private _dotTopFitness:
-    | d3.Selection<SVGCircleElement, { y: number }, SVGGElement, {}>
-    | undefined;
-  private _xScale: d3.ScaleLinear<number, number> | undefined;
-  private _yScale: d3.ScaleLinear<number, number> | undefined;
-  private _xAxis: d3.Axis<number | { valueOf(): number }> | undefined;
-  private _yAxis: d3.Axis<number | { valueOf(): number }> | undefined;
-
   private _style = `
-    .viz__chart-container {
+    .${cssPrefix}${this._containerClassName} {
       display: flex;
       flex-direction: column-reverse;
       
@@ -52,16 +38,18 @@ export default class ChartViz implements VizClass {
       border-radius: 0.3em;
       border: 1px solid #d0d0d0;
       
+      height: 230px;
+
       position: relative;
     }
     
-    .viz__chart-container .legend-container {
+    .${cssPrefix}${this._containerClassName} .legend-container {
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    .viz__chart-container .legend-color {
+    .${cssPrefix}${this._containerClassName} .legend-color {
       height: 0.5em;
       width: 0.5em;
       
@@ -74,46 +62,12 @@ export default class ChartViz implements VizClass {
       border-radius: 0.15em;
     }
     
-    .viz__chart-container .legend-color.yellow {
+    .${cssPrefix}${this._containerClassName} .legend-color.yellow {
       background: #f5a623;
     }
     
-    .viz__chart-container .legend-color.blue {
+    .${cssPrefix}${this._containerClassName} .legend-color.blue {
       background: #0076ff;
-    }
-
-    .viz__chart-container .line {
-      fill: none;
-      stroke: #ffab00;
-      stroke-width: 3;
-    }
-    
-    .viz__chart-container .line.blue {
-      stroke: #0076ff;
-    }
-
-    .viz__chart-container .overlay {
-      fill: none;
-      pointer-events: all;
-    }
-    
-    .viz__chart-container .dot {
-      fill: #f5a623;
-      stroke: #fff;
-      
-      position: relative;
-
-      transition: 300ms ease;
-    }
-    
-    .viz__chart-container .dot.blue {
-      fill: #0076ff;
-    }
-  
-    .viz__chart-container .dot:hover {
-      cursor: pointer;
-      fill: #ff0080;
-      stroke: #fff;
     }
   `;
 
@@ -128,8 +82,14 @@ export default class ChartViz implements VizClass {
       this._parentElement = <HTMLElement>parentElement;
     }
 
-    this._parentElement.classList.add("viz__chart-container");
+    this._parentElement.classList.add(
+      `${cssPrefix}${this._containerClassName}`
+    );
     injectStylesheet(this._style, this._styleId);
+
+    const canvas = document.createElement("div");
+    canvas.id = this._canvasId;
+    this._parentElement.appendChild(canvas);
 
     this._heredity = heredity;
 
@@ -143,195 +103,58 @@ export default class ChartViz implements VizClass {
       return;
     }
 
-    const legendContainer = document.createElement("div");
-    legendContainer.classList.add("legend-container");
-
-    const fitnessLegend = document.createElement("p");
-    const topFitnessLegend = document.createElement("p");
-    fitnessLegend.innerText = "Fitness";
-    topFitnessLegend.innerText = "Top Fitness";
-
-    const fitnessColor = document.createElement("div");
-    const topFitnessColor = document.createElement("div");
-    fitnessColor.classList.add("legend-color");
-    fitnessColor.classList.add("yellow");
-    topFitnessColor.classList.add("legend-color");
-    topFitnessColor.classList.add("blue");
-
-    legendContainer.appendChild(fitnessColor);
-    legendContainer.appendChild(fitnessLegend);
-    legendContainer.appendChild(topFitnessColor);
-    legendContainer.appendChild(topFitnessLegend);
-    this._parentElement.appendChild(legendContainer);
-
-    this.initd3();
-
-    this._parentElement.dataset.initialized = "true";
-  }
-
-  initd3() {
-    const padding = {
-      top: 20,
-      right: 20,
+    const margin = {
+      top: 30,
+      right: 50,
       bottom: 30,
       left: 50
     };
 
-    const width =
-      this._parentElement.clientWidth - padding.left - padding.right;
-    const height =
-      this._parentElement.clientHeight - padding.top - padding.bottom;
+    const bounds = {
+      top: margin.top,
+      right: this._parentElement.clientWidth - margin.left,
+      bottom: this._parentElement.clientHeight - margin.bottom,
+      left: margin.left
+    };
 
-    this._svg = d3
-      .select(this._parentElement)
-      .append("svg")
-      .attr("width", width + padding.left + padding.right)
-      .attr("height", height + padding.top + padding.bottom);
-    // .attr("transform", `translate(${padding.left},${padding.top})`);
+    const graphWidth = bounds.right - bounds.left;
+    const graphHeight = bounds.bottom - bounds.top;
 
-    this._svg
-      .append("defs")
-      .append("clipPath")
-      .attr("id", "clip")
-      .append("rect")
-      .attr("width", width)
-      .attr("height", height);
+    this._canvas = SVG(this._canvasId);
 
-    // const zoomWindow = this._svg
-    //   .append("rect")
-    //   .attr("clip-path", 'url("#clip)')
-    //   .attr("transform", `translate(${0},${0})`)
-    //   .attr("width", width)
-    //   .attr("height", height)
-    //   .style("opacity", 1)
-    //   .style("fill", "whitesmoke")
-    //   .attr("transform", `translate(${padding.left},${padding.top})`);
+    this._axisXLine = this._canvas
+      .line(bounds.left, bounds.bottom, bounds.right, bounds.bottom)
+      .stroke({ color: "#4c4c4c", width: this._axisStrokeWidth });
+    this._axisYLine = this._canvas
+      .line(bounds.left, bounds.top, bounds.left, bounds.bottom)
+      .stroke({ color: "#4c4c4c", width: this._axisStrokeWidth });
 
-    // const xExtent = [1, this._data.fitness.values.length];
-    // const yExtent = [
-    //   this._data.fitness.values.reduce(
-    //     (min, p) => (p.y < min ? p.y : min),
-    //     this._data.fitness.values[0].y
-    //   ),
-    //   this._data.fitness.values.reduce(
-    //     (max, p) => (p.y > max ? p.y : max),
-    //     this._data.fitness.values[0].y
-    //   )
-    // ];
-    const xExtent = [0, 1];
-    const yExtent = [0, 100];
+    new XAxisTick(bounds.right, bounds.bottom, 6, "0.4", this._canvas);
 
-    this._xScale = d3
-      .scaleLinear()
-      .range([0, width])
-      .domain(xExtent)
-      .nice();
+    // const legendContainer = document.createElement("div");
+    // legendContainer.classList.add("legend-container");
 
-    this._yScale = d3
-      .scaleLinear()
-      .range([height, 0])
-      .domain(<any>yExtent)
-      .nice();
+    // const fitnessLegend = document.createElement("p");
+    // const topFitnessLegend = document.createElement("p");
+    // fitnessLegend.innerText = "Fitness";
+    // topFitnessLegend.innerText = "Top Fitness";
 
-    this._xAxis = d3.axisBottom(this._xScale);
-    this._yAxis = d3.axisLeft(this._yScale);
+    // const fitnessColor = document.createElement("div");
+    // const topFitnessColor = document.createElement("div");
+    // fitnessColor.classList.add("legend-color");
+    // fitnessColor.classList.add("yellow");
+    // topFitnessColor.classList.add("legend-color");
+    // topFitnessColor.classList.add("blue");
 
-    this._plotLine = d3
-      .line()
-      .curve(d3.curveMonotoneX)
-      .x((d, i) => this._xScale!(i + 1))
-      .y((d: any) => this._yScale!(d.y));
+    // legendContainer.appendChild(fitnessColor);
+    // legendContainer.appendChild(fitnessLegend);
+    // legendContainer.appendChild(topFitnessColor);
+    // legendContainer.appendChild(topFitnessLegend);
+    // this._parentElement.appendChild(legendContainer);
 
-    this._plotLineTopFitness = d3
-      .line()
-      .curve(d3.curveMonotoneX)
-      .x((d, i) => this._xScale!(i + 1))
-      .y((d: any) => this._yScale!(d.y));
+    // this.update();
 
-    this._svg
-      .append("g")
-      .attr("class", "x axis")
-      .attr("transform", `translate(${padding.left},${padding.top + height})`)
-      .call(this._xAxis);
-
-    this._svg
-      .append("g")
-      .attr("class", "y axis")
-      .attr("transform", `translate(${padding.left},${padding.top})`)
-      .call(this._yAxis);
-
-    this._line = this._svg
-      .append("g")
-      .attr("transform", `translate(${padding.left},${padding.top})`)
-      .append("path")
-      .datum(this._data.fitness.values)
-      .attr("class", "line")
-      .attr("d", <any>this._plotLine);
-
-    this._lineTopFitness = this._svg
-      .append("g")
-      .attr("transform", `translate(${padding.left},${padding.top})`)
-      .append("path")
-      .datum(this._data.topFitness.values)
-      .attr("class", "line blue")
-      .attr("d", <any>this._plotLineTopFitness);
-
-    // this._svg
-    //   .append("g")
-    //   // .attr(
-    //   //   "transform",
-    //   //   `translate(${padding.left + padding.right},${-height})`
-    //   // )
-    //   .append("path")
-    //   .datum(dataset)
-    //   .attr("class", "line")
-    //   .attr("d", <any>line);
-
-    this._dot = this._svg
-      .append("g")
-      .attr("transform", `translate(${padding.left},${padding.top})`)
-      .selectAll(".dot")
-      .data(this._data.fitness.values)
-      .enter()
-      .append("circle")
-      .attr("class", "dot")
-      .attr("cx", (d, i) => {
-        return this._xScale!(i + 1);
-      })
-      .attr("cy", d => this._yScale!(d.y))
-      .attr("r", 5);
-
-    this._dotTopFitness = this._svg
-      .append("g")
-      .attr("transform", `translate(${padding.left},${padding.top})`)
-      .selectAll(".dot")
-      .data(this._data.topFitness.values)
-      .enter()
-      .append("circle")
-      .attr("class", "dot blue")
-      .attr("cx", (d, i) => {
-        return this._xScale!(i + 1);
-      })
-      .attr("cy", d => this._yScale!(d.y))
-      .attr("r", 5);
-
-    // this._dot = this._svg.selectAll(".dot");
-    // .on("mouseover", function(a, b, c) {
-    //   d3.select(this).classed("focus", true);
-    // })
-    // .on("mouseout", function(a, b, c) {
-    //   d3.select(this).classed("focus", false);
-    // });
-
-    // zoomWindow.call(zoom);
-
-    // this._svg = d3.select(this._parentElement).append("svg");
-    // const width =
-    //   this._parentElement.clientWidth - padding.left - padding.right;
-    // const height =
-    //   this._parentElement.clientHeight - padding.top - padding.bottom;
-    // this._svg.attr("width", width + padding.left + padding.right);
-    // this._svg.attr("height", height + padding.top + padding.bottom);
+    this._parentElement.dataset.initialized = "true";
   }
 
   update() {
@@ -339,135 +162,23 @@ export default class ChartViz implements VizClass {
       this._heredity.history.length - 1
     ].topChromosome().fitness;
 
-    this._data.fitness.values.push({ y: latestFitness });
+    this._chartData.fitness.values.push(latestFitness);
     const topFitness =
-      this._data.topFitness.values.length === 0
+      this._chartData.topFitness.values.length === 0
         ? 0
-        : this._data.topFitness.values[this._data.topFitness.values.length - 1]
-            .y;
-    this._data.topFitness.values.push({
-      y: Math.max(latestFitness, topFitness)
-    });
+        : this._chartData.topFitness.values[
+            this._chartData.topFitness.values.length - 1
+          ];
+    this._chartData.topFitness.values.push(Math.max(latestFitness, topFitness));
 
-    this.updated3();
-  }
+    const xMax = this._chartData.fitness.values.length - 1;
 
-  updated3() {
-    const xExtent = [1, this._data.fitness.values.length];
-    const yExtent = [
-      this._data.fitness.values.reduce(
-        (min, p) => (p.y < min ? p.y : min),
-        this._data.fitness.values[0].y
-      ),
-      this._data.fitness.values.reduce(
-        (max, p) => (p.y > max ? p.y : max),
-        this._data.fitness.values[0].y
-      )
-    ];
+    for (const key in this._chartData) {
+      const chartObj = this._chartData[key];
 
-    this._xScale!.domain(xExtent).nice();
-    this._yScale!.domain(<any>yExtent).nice();
-
-    this._xAxis!.scale(<any>this._xScale);
-    this._yAxis!.scale(<any>this._yScale);
-
-    this._plotLine = d3
-      .line()
-      .curve(d3.curveMonotoneX)
-      .x((d, i) => this._xScale!(i + 1))
-      .y((d: any) => this._yScale!(d.y));
-
-    this._plotLineTopFitness = d3
-      .line()
-      .curve(d3.curveMonotoneX)
-      .x((d, i) => this._xScale!(i + 1))
-      .y((d: any) => this._yScale!(d.y));
-
-    const transition = d3.transition().duration(300);
-    this._svg!.select(".x")
-      .transition(<any>transition)
-      .call(<any>this._xAxis);
-    this._svg!.select(".y")
-      .transition(<any>transition)
-      .call(<any>this._yAxis);
-
-    this._line!.datum(this._data.fitness.values)
-      // .transition(<any>transition)
-      .attr("d", <any>this._plotLine);
-
-    this._lineTopFitness!.datum(this._data.topFitness.values)
-      // .transition(<any>transition)
-      .attr("d", <any>this._plotLine);
-
-    // this._dot!.data(
-    //   this._data.fitness.values.map(i => {
-    //     return {
-    //       y: i
-    //     };
-    //   })
-    // )
-    //   .transition()
-    //   .duration(300)
-    //   .attr("cx", (d, i) => {
-    //     return this._xScale!(i + 1);
-    //   })
-    //   .attr("cy", d => this._yScale!((<any>d).y));
-
-    this._svg!.selectAll(".dot").remove();
-
-    this._dot!.data(this._data.fitness.values)
-      .enter()
-      .append("circle")
-      .merge(<any>this._dot)
-      .attr("class", "dot")
-      .attr("cx", (d, i) => {
-        return this._xScale!(i + 1);
-      })
-      .attr("cy", d => this._yScale!(d.y))
-      .attr("r", 5)
-      .exit()
-      .remove();
-    // .on("mouseover", function(a, b, c) {
-    //   d3.select(this).classed("focus", true);
-    // })
-    // .on("mouseout", function(a, b, c) {
-    //   d3.select(this).classed("focus", false);
-    // })
-    // .exit()
-    // .remove();
-
-    this._dotTopFitness!.data(this._data.topFitness.values)
-      .enter()
-      .append("circle")
-      .merge(<any>this._dotTopFitness)
-      .attr("class", "dot blue")
-      .attr("cx", (d, i) => {
-        return this._xScale!(i + 1);
-      })
-      .attr("cy", d => this._yScale!(d.y))
-      .attr("r", 5)
-      .exit()
-      .remove();
-
-    // Object.keys(this._data).forEach((d, i) => {
-    //   if (d3.select(`#line${i}`).empty()) {
-    //     // Add new charts
-    //     // Add line plot
-    //     console.log(this._plotLine);
-    //     this._line!.append("g")
-    //       .attr("id", `line-${i}`)
-    //       .attr("clip-path", "url(#clip)")
-    //       .append("path")
-    //       .data([(<any>this._data)[d].values])
-    //       .attr("class", "pointlines")
-    //       .attr("d", <any>this._plotLine)
-    //       .style("fill", "none");
-    //     // .style("stroke", () => ((<any>d).color = this._color("3")));
-    //   } else {
-    //     console.log("TOTES");
-    //   }
-
-    // });
+      const yMax = Math.max(...chartObj.values);
+      const yMin = Math.min(...chartObj.values);
+    }
   }
 
   link(toLink: VizClass): boolean {
@@ -475,12 +186,66 @@ export default class ChartViz implements VizClass {
   }
 }
 
+abstract class AxisTick {
+  protected _x: number;
+  protected _y: number;
+  protected _height: number;
+  protected _width = 1;
+  protected _margin = 3;
+  protected _value: string;
+
+  protected _draw: SVG.Doc;
+
+  protected _group?: SVG.G;
+
+  constructor(
+    x: number,
+    y: number,
+    height: number,
+    value: string,
+    draw: SVG.Doc
+  ) {
+    this._x = x;
+    this._y = y;
+    this._height = height;
+    this._value = value;
+
+    this._draw = draw;
+
+    this.init();
+  }
+
+  abstract init(): void;
+}
+
+class XAxisTick extends AxisTick {
+  init() {
+    this._group = this._draw.group().move(this._x, this._y);
+
+    const line = this._draw
+      .rect(this._width, this._height)
+      .move(-this._width, 0)
+      .fill("#4c4c4c");
+
+    const text = this._draw
+      .plain(this._value)
+      .font({ size: 11 })
+      .cx(0)
+      .y(this._height + this._margin);
+
+    this._group.add(line);
+    this._group.add(text);
+  }
+}
+
 interface ChartDataType {
+  [key: string]: ChartDataFitnessType;
   topFitness: ChartDataFitnessType;
   fitness: ChartDataFitnessType;
 }
 
 interface ChartDataFitnessType {
   name: string;
-  values: { y: number }[];
+  values: number[];
+  lineColor: string;
 }
