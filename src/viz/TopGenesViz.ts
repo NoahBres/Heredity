@@ -29,6 +29,8 @@ export default class TopGeneViz implements VizClass {
 
       max-height: 400px;
       flex-direction: row;
+
+      overflow-y: auto;
     }
 
     .viz__top-genes-pill-container {
