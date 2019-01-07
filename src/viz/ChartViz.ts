@@ -205,12 +205,20 @@ export default class ChartViz implements VizClass {
       )
     );
 
+    let yMin = 0;
+    let yMax = 0;
+
     for (const key in this._chartData) {
       const chartObj = this._chartData[key];
 
-      const yMax = Math.max(...chartObj.values);
-      const yMin = Math.min(...chartObj.values);
+      const yMaxLocal = Math.max(...chartObj.values);
+      const yMinLocal = Math.min(...chartObj.values);
+
+      yMin = Math.min(yMin, yMinLocal);
+      yMax = Math.max(yMax, yMaxLocal);
     }
+
+    new YAxisTick(this._bounds!.left, this._bounds!.top, 6, "5", this._canvas!);
   }
 
   link(toLink: VizClass): boolean {
@@ -272,6 +280,30 @@ class XAxisTick extends AxisTick {
   set x(x: number) {
     this._x = x + this._width;
     this._group!.animate(300, ">").x(this._x);
+  }
+}
+
+class YAxisTick extends AxisTick {
+  init() {
+    this._group = this._draw.group().move(this._x, this._y);
+
+    const line = this._draw
+      .rect(this._height, this._width)
+      .move(-this._height, 0)
+      .fill("#4c4c4c");
+
+    this._margin = 0;
+
+    const text = this._draw.plain(this._value).font({ size: 11 });
+    text.cy(0).cx(-this._height - this._margin - text.bbox().width);
+
+    this._group.add(line);
+    this._group.add(text);
+  }
+
+  set y(y: number) {
+    this._y = y + this._width;
+    this._group!.animate(300, ">").y(this._y);
   }
 }
 
