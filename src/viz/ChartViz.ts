@@ -220,7 +220,24 @@ export default class ChartViz implements VizClass {
     }
 
     if (yMax - yMin < 10) {
+      console.log(this._yAxisTicks);
       this._yAxisTicks.forEach(n => n.remove());
+      this._yAxisTicks = [];
+
+      // TODO This is so hacky. Fix it
+      Array(Math.ceil(yMax - yMin))
+        .fill(null)
+        .forEach((n, i, arr) => {
+          this._yAxisTicks.push(
+            new YAxisTick(
+              this._bounds!.left,
+              (this._bounds!.bottom - this._bounds!.top) * (i / arr.length),
+              6,
+              i.toString(),
+              this._canvas!
+            )
+          );
+        });
     }
 
     // new YAxisTick(this._bounds!.left, this._bounds!.top, 6, "5", this._canvas!);
