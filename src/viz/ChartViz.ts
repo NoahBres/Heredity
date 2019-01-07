@@ -225,15 +225,18 @@ export default class ChartViz implements VizClass {
       this._yAxisTicks = [];
 
       // TODO This is so hacky. Fix it
+      // Soooooooooooooooo hacky
       Array(Math.ceil(yMax - yMin))
         .fill(null)
         .forEach((n, i, arr) => {
           this._yAxisTicks.push(
             new YAxisTick(
               this._bounds!.left,
-              (this._bounds!.bottom - this._bounds!.top) * (i / arr.length),
+              this._bounds!.top +
+                (this._bounds!.bottom - this._bounds!.top) *
+                  (i / Math.max(arr.length - 1, 1)),
               6,
-              i.toString(),
+              (Math.floor(yMax) - i).toString(),
               this._canvas!
             )
           );
