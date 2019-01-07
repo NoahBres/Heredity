@@ -17,6 +17,7 @@ export default class ChartViz implements VizClass {
   private _axisStrokeWidth = 1;
 
   private _xAxisTicks: XAxisTick[] = [];
+  private _yAxisTicks: YAxisTick[] = [];
 
   private _margin?: {
     top: number;
@@ -205,8 +206,8 @@ export default class ChartViz implements VizClass {
       )
     );
 
-    let yMin = 0;
-    let yMax = 0;
+    let yMin = this._chartData.fitness.values[0];
+    let yMax = this._chartData.fitness.values[0];
 
     for (const key in this._chartData) {
       const chartObj = this._chartData[key];
@@ -218,7 +219,11 @@ export default class ChartViz implements VizClass {
       yMax = Math.max(yMax, yMaxLocal);
     }
 
-    new YAxisTick(this._bounds!.left, this._bounds!.top, 6, "5", this._canvas!);
+    if (yMax - yMin < 10) {
+      this._yAxisTicks.forEach(n => n.remove());
+    }
+
+    // new YAxisTick(this._bounds!.left, this._bounds!.top, 6, "5", this._canvas!);
   }
 
   link(toLink: VizClass): boolean {
@@ -235,6 +240,8 @@ abstract class AxisTick {
   protected _value: string;
 
   protected _draw: SVG.Doc;
+  protected _line?: SVG.Rect;
+  protected _text?: SVG.Text;
 
   protected _group?: SVG.G;
 
@@ -255,6 +262,10 @@ abstract class AxisTick {
     this.init();
   }
 
+  remove() {
+    this._group!.remove();
+  }
+
   abstract init(): void;
 }
 
@@ -262,19 +273,19 @@ class XAxisTick extends AxisTick {
   init() {
     this._group = this._draw.group().move(this._x, this._y);
 
-    const line = this._draw
+    this._line = this._draw
       .rect(this._width, this._height)
       .move(-this._width, 0)
       .fill("#4c4c4c");
 
-    const text = this._draw
+    this._text = this._draw
       .plain(this._value)
       .font({ size: 11 })
       .cx(0)
       .y(this._height + this._margin);
 
-    this._group.add(line);
-    this._group.add(text);
+    this._group.add(this._line);
+    this._group.add(this._text);
   }
 
   set x(x: number) {
@@ -287,18 +298,18 @@ class YAxisTick extends AxisTick {
   init() {
     this._group = this._draw.group().move(this._x, this._y);
 
-    const line = this._draw
+    this._line = this._draw
       .rect(this._height, this._width)
       .move(-this._height, 0)
       .fill("#4c4c4c");
 
     this._margin = 0;
 
-    const text = this._draw.plain(this._value).font({ size: 11 });
-    text.cy(0).cx(-this._height - this._margin - text.bbox().width);
+    this._text = this._draw.plain(this._value).font({ size: 11 });
+    this._text.cy(0).cx(-this._height - this._margin - this._text.bbox().width);
 
-    this._group.add(line);
-    this._group.add(text);
+    this._group.add(this._line);
+    this._group.add(this._text);
   }
 
   set y(y: number) {
