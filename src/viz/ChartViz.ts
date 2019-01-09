@@ -2,6 +2,9 @@ import Heredity from "../Heredity";
 import { default as VizClass, injectStylesheet, cssPrefix } from "./VizClass";
 import * as SVG from "svg.js";
 
+// TODO Move ticsk to their own axis groups
+// TODO Don't remove ticks that don't need to be removed
+
 export default class ChartViz implements VizClass {
   _heredity: Heredity;
   _parentElement: HTMLElement;
@@ -18,6 +21,8 @@ export default class ChartViz implements VizClass {
 
   private _xAxisTicks: XAxisTick[] = [];
   private _yAxisTicks: YAxisTick[] = [];
+
+  private _lastMaxY = 0;
 
   private _margin?: {
     top: number;
@@ -219,31 +224,139 @@ export default class ChartViz implements VizClass {
       yMax = Math.max(yMax, yMaxLocal);
     }
 
-    if (yMax - yMin < 10) {
-      console.log(this._yAxisTicks);
-      this._yAxisTicks.forEach(n => n.remove());
-      this._yAxisTicks = [];
+    const difference = yMax - yMin;
+    if (this._chartData.fitness.values.length === 1) {
+      this._yAxisTicks.push(
+        new YAxisTick(
+          this._bounds!.left,
+          this._bounds!.top,
+          6,
+          Math.floor(yMin).toString(),
+          this._canvas!
+        )
+      );
 
-      // TODO This is so hacky. Fix it
-      // Soooooooooooooooo hacky
-      Array(Math.ceil(yMax - yMin))
-        .fill(null)
-        .forEach((n, i, arr) => {
-          this._yAxisTicks.push(
-            new YAxisTick(
-              this._bounds!.left,
-              this._bounds!.top +
-                (this._bounds!.bottom - this._bounds!.top) *
-                  (i / Math.max(arr.length - 1, 1)),
-              6,
-              (Math.floor(yMax) - i).toString(),
-              this._canvas!
-            )
-          );
-        });
+      // TODO Fix this, suuuuuper disgusting and hacky
+      // TODO Turn it into a loop?
+    } else if (difference <= 10) {
+      this.handleTicks(this._yAxisTicks, yMin, yMax, 1);
+    } else if (difference <= 20) {
+      this.handleTicks(this._yAxisTicks, yMin, yMax, 2);
+    } else if (difference <= 50) {
+      this.handleTicks(
+        this._yAxisTicks,
+        this.roundDown(yMin, 5),
+        this.roundUp(yMax, 5),
+        5
+      );
+    } else if (difference <= 100) {
+      this.handleTicks(
+        this._yAxisTicks,
+        this.roundDown(yMin, 10),
+        this.roundUp(yMax, 10),
+        10
+      );
+    } else if (difference <= 250) {
+      this.handleTicks(
+        this._yAxisTicks,
+        this.roundDown(yMin, 25),
+        this.roundUp(yMax, 25),
+        25
+      );
+    } else if (difference <= 500) {
+      this.handleTicks(
+        this._yAxisTicks,
+        this.roundDown(yMin, 50),
+        this.roundUp(yMax, 50),
+        50
+      );
+    } else if (difference <= 750) {
+      this.handleTicks(
+        this._yAxisTicks,
+        this.roundDown(yMin, 75),
+        this.roundUp(yMax, 75),
+        75
+      );
+    } else if (difference <= 1000) {
+      this.handleTicks(
+        this._yAxisTicks,
+        this.roundDown(yMin, 100),
+        this.roundUp(yMax, 100),
+        75
+      );
+    } else if (difference <= 1500) {
+      this.handleTicks(
+        this._yAxisTicks,
+        this.roundDown(yMin, 150),
+        this.roundUp(yMax, 150),
+        75
+      );
+    } else if (difference <= 2000) {
+      this.handleTicks(
+        this._yAxisTicks,
+        this.roundDown(yMin, 200),
+        this.roundUp(yMax, 200),
+        75
+      );
+    } else {
+      this.handleTicks(
+        this._yAxisTicks,
+        yMin,
+        yMax,
+        Math.ceil((yMax - yMin) / 10)
+      );
     }
-
     // new YAxisTick(this._bounds!.left, this._bounds!.top, 6, "5", this._canvas!);
+  }
+
+  handleTicks(
+    ticks: YAxisTick[],
+    yMin: number,
+    yMax: number,
+    interval: number
+  ) {
+    if (this._lastMaxY === yMax) return;
+
+    this._lastMaxY = yMax;
+
+    console.log({ yMin, yMax, interval });
+
+    ticks.forEach(n => n.remove());
+    ticks.length = 0;
+
+    // TODO This is so hacky. Fix it.
+    // Soooooooooooooooo hacky
+    // Make the code not disgusting
+    Array(Math.ceil((yMax - yMin) / interval))
+      .fill(undefined)
+      .forEach((n, i, arr) => {
+        const newTick = new YAxisTick(
+          this._bounds!.left,
+          0,
+          6,
+          Math.floor(yMax - i * interval).toString(),
+          this._canvas!
+        );
+
+        newTick.y =
+          this._bounds!.top +
+          (this._bounds!.bottom - this._bounds!.top) *
+            (i / Math.max(arr.length - 1, 1));
+
+        ticks.push(newTick);
+      });
+    console.log(ticks);
+  }
+
+  roundUp(n: number, toRound: number): number {
+    return toRound * Math.round(n / toRound);
+  }
+
+  roundDown(n: number, toRound: number): number {
+    let num = this.roundUp(n, toRound);
+    if (num > n) num -= toRound;
+
+    return num;
   }
 
   link(toLink: VizClass): boolean {
@@ -333,8 +446,19 @@ class YAxisTick extends AxisTick {
   }
 
   set y(y: number) {
-    this._y = y + this._width;
+    this._y = y;
     this._group!.animate(300, ">").y(this._y);
+  }
+
+  remove() {
+    this._y = this._group!.doc().node.clientHeight;
+    this._group!.animate(300, ">")
+      .y(this._y)
+      .attr("opacity", "0")
+      .after(() => {
+        this._group!.remove();
+      });
+    // this._group!.remove();
   }
 }
 
