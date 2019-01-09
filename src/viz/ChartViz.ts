@@ -14,6 +14,9 @@ export default class ChartViz implements VizClass {
   private _canvas?: SVG.Doc;
   private readonly _canvasId = `${cssPrefix}chart-viz-canvas`;
 
+  private _noDataText?: SVG.Text;
+  private _noDataTextRemoved = false;
+
   private _axisXLine?: SVG.Rect;
   private _axisYLine?: SVG.Rect;
 
@@ -156,6 +159,17 @@ export default class ChartViz implements VizClass {
       .fill("#4c4c4c")
       .move(this._bounds.left, this._bounds.top);
 
+    this._noDataText = this._canvas
+      .plain("No Data Available")
+      .font({ size: 16 })
+      .cx(this._parentElement.clientWidth / 2)
+      .cy(this._parentElement.clientHeight / 2);
+    //  this._text = this._draw
+    // .plain(this._value)
+    // .font({ size: 11 })
+    // .cx(0)
+    // .y(this._height + this._margin);
+
     // const legendContainer = document.createElement("div");
     // legendContainer.classList.add("legend-container");
 
@@ -183,6 +197,16 @@ export default class ChartViz implements VizClass {
   }
 
   update() {
+    if (!this._noDataTextRemoved) {
+      this._noDataText!.animate(200)
+        .attr({ opacity: 0 })
+        .transform({ scale: 0.8 })
+        .after(() => {
+          this._noDataText!.remove();
+          this._noDataTextRemoved = true;
+        });
+    }
+
     const latestFitness = this._heredity.history[
       this._heredity.history.length - 1
     ].topChromosome().fitness;
