@@ -224,6 +224,26 @@ export default class ChartViz implements VizClass {
       yMax = Math.max(yMax, yMaxLocal);
     }
 
+    // TODO I need to make this scale higher
+    const tensDifference = [
+      1,
+      5,
+      10,
+      15,
+      20,
+      25,
+      50,
+      75,
+      100,
+      150,
+      200,
+      250,
+      300,
+      500,
+      750,
+      1000
+    ];
+
     const difference = yMax - yMin;
     if (this._chartData.fitness.values.length === 1) {
       this._yAxisTicks.push(
@@ -237,73 +257,17 @@ export default class ChartViz implements VizClass {
       );
 
       // TODO Fix this, suuuuuper disgusting and hacky
-      // TODO Turn it into a loop?
-    } else if (difference <= 10) {
-      this.handleTicks(this._yAxisTicks, yMin, yMax, 1);
-    } else if (difference <= 20) {
-      this.handleTicks(this._yAxisTicks, yMin, yMax, 2);
-    } else if (difference <= 50) {
-      this.handleTicks(
-        this._yAxisTicks,
-        this.roundDown(yMin, 5),
-        this.roundUp(yMax, 5),
-        5
-      );
-    } else if (difference <= 100) {
-      this.handleTicks(
-        this._yAxisTicks,
-        this.roundDown(yMin, 10),
-        this.roundUp(yMax, 10),
-        10
-      );
-    } else if (difference <= 250) {
-      this.handleTicks(
-        this._yAxisTicks,
-        this.roundDown(yMin, 25),
-        this.roundUp(yMax, 25),
-        25
-      );
-    } else if (difference <= 500) {
-      this.handleTicks(
-        this._yAxisTicks,
-        this.roundDown(yMin, 50),
-        this.roundUp(yMax, 50),
-        50
-      );
-    } else if (difference <= 750) {
-      this.handleTicks(
-        this._yAxisTicks,
-        this.roundDown(yMin, 75),
-        this.roundUp(yMax, 75),
-        75
-      );
-    } else if (difference <= 1000) {
-      this.handleTicks(
-        this._yAxisTicks,
-        this.roundDown(yMin, 100),
-        this.roundUp(yMax, 100),
-        75
-      );
-    } else if (difference <= 1500) {
-      this.handleTicks(
-        this._yAxisTicks,
-        this.roundDown(yMin, 150),
-        this.roundUp(yMax, 150),
-        75
-      );
-    } else if (difference <= 2000) {
-      this.handleTicks(
-        this._yAxisTicks,
-        this.roundDown(yMin, 200),
-        this.roundUp(yMax, 200),
-        75
-      );
     } else {
+      let thisNum = tensDifference[0];
+      tensDifference.some((e, i) => {
+        thisNum = e;
+        return difference <= e * 10;
+      });
       this.handleTicks(
         this._yAxisTicks,
-        yMin,
-        yMax,
-        Math.ceil((yMax - yMin) / 10)
+        this.roundDown(yMin, thisNum),
+        this.roundUp(yMax, thisNum),
+        thisNum
       );
     }
     // new YAxisTick(this._bounds!.left, this._bounds!.top, 6, "5", this._canvas!);
@@ -349,7 +313,11 @@ export default class ChartViz implements VizClass {
   }
 
   roundUp(n: number, toRound: number): number {
-    return toRound * Math.round(n / toRound);
+    let num = toRound * Math.round(n / toRound);
+
+    if (num < n) num += toRound;
+
+    return num;
   }
 
   roundDown(n: number, toRound: number): number {
