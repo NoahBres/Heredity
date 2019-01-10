@@ -27,6 +27,8 @@ export default class ChartViz implements VizClass {
 
   private _lastMaxY = 0;
 
+  private _plotLines: SVG.PolyLine[] = [];
+
   private _margin?: {
     top: number;
     right: number;
@@ -164,11 +166,17 @@ export default class ChartViz implements VizClass {
       .font({ size: 16 })
       .cx(this._parentElement.clientWidth / 2)
       .cy(this._parentElement.clientHeight / 2);
-    //  this._text = this._draw
-    // .plain(this._value)
-    // .font({ size: 11 })
-    // .cx(0)
-    // .y(this._height + this._margin);
+
+    Object.values(this._chartData).forEach(obj => {
+      this._plotLines.push(
+        this._canvas!.polyline([
+          [0, this._bounds!.bottom],
+          [this._bounds!.right, this._bounds!.bottom]
+        ])
+      );
+    });
+
+    console.log(this._plotLines);
 
     // const legendContainer = document.createElement("div");
     // legendContainer.classList.add("legend-container");
@@ -238,15 +246,13 @@ export default class ChartViz implements VizClass {
     let yMin = this._chartData.fitness.values[0];
     let yMax = this._chartData.fitness.values[0];
 
-    for (const key in this._chartData) {
-      const chartObj = this._chartData[key];
-
-      const yMaxLocal = Math.max(...chartObj.values);
-      const yMinLocal = Math.min(...chartObj.values);
+    Object.values(this._chartData).forEach(obj => {
+      const yMaxLocal = Math.max(...obj.values);
+      const yMinLocal = Math.min(...obj.values);
 
       yMin = Math.min(yMin, yMinLocal);
       yMax = Math.max(yMax, yMaxLocal);
-    }
+    });
 
     // TODO I need to make this scale higher
     const tensDifference = [
