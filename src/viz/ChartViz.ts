@@ -1,6 +1,7 @@
 import Heredity from "../Heredity";
 import { default as VizClass, injectStylesheet, cssPrefix } from "./VizClass";
 import * as SVG from "svg.js";
+import { timingSafeEqual } from "crypto";
 
 // TODO Move ticsk to their own axis groups
 // TODO Don't remove ticks that don't need to be removed
@@ -20,7 +21,8 @@ export default class ChartViz implements VizClass {
   private _axisXLine?: SVG.Rect;
   private _axisYLine?: SVG.Rect;
 
-  private _axisStrokeWidth = 1;
+  private _axisStrokeWidth = 3;
+  private _axisTickWidth = 2;
 
   private _xAxisTicks: XAxisTick[] = [];
   private _yAxisTicks: YAxisTick[] = [];
@@ -28,6 +30,7 @@ export default class ChartViz implements VizClass {
   private _lastMaxY = 0;
 
   private _plotLines: SVG.PolyLine[] = [];
+  private _plotLineWidth = 2;
 
   private _margin?: {
     top: number;
@@ -55,7 +58,7 @@ export default class ChartViz implements VizClass {
     fitness: {
       name: "Fitness",
       values: [],
-      lineColor: "0076ff"
+      lineColor: "#0076ff"
     }
   };
 
@@ -157,9 +160,12 @@ export default class ChartViz implements VizClass {
       .fill("#4c4c4c")
       .move(this._bounds.left, this._bounds.bottom);
     this._axisYLine = this._canvas
-      .rect(this._axisStrokeWidth, this._bounds.bottom - this._bounds.top)
+      .rect(
+        this._axisStrokeWidth,
+        this._bounds.bottom - this._bounds.top + this._axisStrokeWidth
+      )
       .fill("#4c4c4c")
-      .move(this._bounds.left, this._bounds.top);
+      .move(this._bounds.left - this._axisStrokeWidth, this._bounds.top);
 
     this._noDataText = this._canvas
       .plain("No Data Available")
@@ -167,16 +173,28 @@ export default class ChartViz implements VizClass {
       .cx(this._parentElement.clientWidth / 2)
       .cy(this._parentElement.clientHeight / 2);
 
+    // Move this down to update
     Object.values(this._chartData).forEach(obj => {
       this._plotLines.push(
         this._canvas!.polyline([
-          [0, this._bounds!.bottom],
-          [this._bounds!.right, this._bounds!.bottom]
+          [
+            this._bounds!.left + this._plotLineWidth / 2,
+            this._bounds!.top + this._plotLineWidth / 2
+          ],
+          [
+            this._bounds!.right - this._plotLineWidth / 2,
+            this._bounds!.top + this._plotLineWidth / 2
+          ]
         ])
+          .fill("none")
+          .stroke({
+            color: obj.lineColor,
+            width: this._plotLineWidth,
+            linecap: "square",
+            linejoin: "round"
+          })
       );
     });
-
-    console.log(this._plotLines);
 
     // const legendContainer = document.createElement("div");
     // legendContainer.classList.add("legend-container");
@@ -236,7 +254,8 @@ export default class ChartViz implements VizClass {
     this._xAxisTicks.push(
       new XAxisTick(
         this._bounds!.right,
-        this._bounds!.bottom,
+        this._bounds!.bottom + this._axisStrokeWidth,
+        this._axisTickWidth,
         6,
         (this._chartData.fitness.values.length - 1).toString(),
         this._canvas!
@@ -278,8 +297,9 @@ export default class ChartViz implements VizClass {
     if (this._chartData.fitness.values.length === 1) {
       this._yAxisTicks.push(
         new YAxisTick(
-          this._bounds!.left,
+          this._bounds!.left - this._axisStrokeWidth,
           this._bounds!.top,
+          this._axisTickWidth,
           6,
           Math.floor(yMin).toString(),
           this._canvas!
@@ -300,7 +320,25 @@ export default class ChartViz implements VizClass {
         thisNum
       );
     }
-    // new YAxisTick(this._bounds!.left, this._bounds!.top, 6, "5", this._canvas!);
+
+    Object.values(this._chartData).forEach((n, i) => {
+      if (n.values.length === 1) return;
+      const newPlot: number[][] = [];
+
+      n.values.forEach((n, i) => {
+        const coords = [
+          (i / (xMax === 0 ? 1 : xMax)) * this._graphWidth + this._bounds!.left,
+          (1 - (n - yMin) / (yMax - yMin === 0 ? 1 : yMax - yMin)) *
+            this._graphHeight +
+            this._bounds!.top
+        ];
+
+        console.log(n - yMin / (yMax - yMin === 0 ? 1 : yMax - yMin));
+        newPlot.push(coords);
+      });
+
+      (<any>this._plotLines[i]).animate(200).plot(newPlot);
+    });
   }
 
   handleTicks(
@@ -313,20 +351,20 @@ export default class ChartViz implements VizClass {
 
     this._lastMaxY = yMax;
 
-    console.log({ yMin, yMax, interval });
-
     ticks.forEach(n => n.remove());
     ticks.length = 0;
 
     // TODO This is so hacky. Fix it.
     // Soooooooooooooooo hacky
     // Make the code not disgusting
+    // Replace with Array.from with map parameter
     Array(Math.ceil((yMax - yMin) / interval))
       .fill(undefined)
       .forEach((n, i, arr) => {
         const newTick = new YAxisTick(
-          this._bounds!.left,
+          this._bounds!.left - this._axisStrokeWidth,
           0,
+          this._axisTickWidth,
           6,
           Math.floor(yMax - i * interval).toString(),
           this._canvas!
@@ -334,12 +372,11 @@ export default class ChartViz implements VizClass {
 
         newTick.y =
           this._bounds!.top +
-          (this._bounds!.bottom - this._bounds!.top) *
+          (this._bounds!.bottom - this._bounds!.top - this._axisTickWidth) *
             (i / Math.max(arr.length - 1, 1));
 
         ticks.push(newTick);
       });
-    console.log(ticks);
   }
 
   roundUp(n: number, toRound: number): number {
@@ -366,7 +403,7 @@ abstract class AxisTick {
   protected _x: number;
   protected _y: number;
   protected _height: number;
-  protected _width = 1;
+  protected _width: number;
   protected _margin = 3;
   protected _value: string;
 
@@ -379,12 +416,14 @@ abstract class AxisTick {
   constructor(
     x: number,
     y: number,
+    width: number,
     height: number,
     value: string,
     draw: SVG.Doc
   ) {
     this._x = x;
     this._y = y;
+    this._width = width;
     this._height = height;
     this._value = value;
 
