@@ -5,6 +5,7 @@ import { timingSafeEqual } from "crypto";
 
 // TODO Move ticsk to their own axis groups
 // TODO Don't remove ticks that don't need to be removed
+// TODO give the option to start the graph at 0 rather than the lowest number
 
 export default class ChartViz implements VizClass {
   _heredity: Heredity;
@@ -49,14 +50,15 @@ export default class ChartViz implements VizClass {
   private _graphWidth = 0;
   private _graphHeight = 0;
 
+  // The order of the objects affects it's drawing order. So lower on the objects == drawn on top
   private _chartData: ChartDataType = {
-    topFitness: {
-      name: "Top Fitness",
+    fitness: {
+      name: "Fitness",
       values: [],
       lineColor: "#f5a623"
     },
-    fitness: {
-      name: "Fitness",
+    topFitness: {
+      name: "Top Fitness",
       values: [],
       lineColor: "#0076ff"
     }
@@ -155,25 +157,6 @@ export default class ChartViz implements VizClass {
 
     this._canvas = SVG(this._canvasId);
 
-    this._axisXLine = this._canvas
-      .rect(this._bounds.right - this._bounds.left, this._axisStrokeWidth)
-      .fill("#4c4c4c")
-      .move(this._bounds.left, this._bounds.bottom);
-    this._axisYLine = this._canvas
-      .rect(
-        this._axisStrokeWidth,
-        this._bounds.bottom - this._bounds.top + this._axisStrokeWidth
-      )
-      .fill("#4c4c4c")
-      .move(this._bounds.left - this._axisStrokeWidth, this._bounds.top);
-
-    this._noDataText = this._canvas
-      .plain("No Data Available")
-      .font({ size: 16 })
-      .cx(this._parentElement.clientWidth / 2)
-      .cy(this._parentElement.clientHeight / 2);
-
-    // Move this down to update
     Object.values(this._chartData).forEach(obj => {
       this._plotLines.push(
         this._canvas!.polyline([
@@ -196,6 +179,27 @@ export default class ChartViz implements VizClass {
       );
     });
 
+    this._axisXLine = this._canvas
+      .rect(
+        this._bounds.right - this._bounds.left + this._axisStrokeWidth,
+        this._axisStrokeWidth
+      )
+      .fill("#4c4c4c")
+      .move(this._bounds.left - this._axisStrokeWidth, this._bounds.bottom);
+    this._axisYLine = this._canvas
+      .rect(
+        this._axisStrokeWidth,
+        this._bounds.bottom - this._bounds.top + this._axisStrokeWidth
+      )
+      .fill("#4c4c4c")
+      .move(this._bounds.left - this._axisStrokeWidth, this._bounds.top);
+
+    this._noDataText = this._canvas
+      .plain("No Data Available")
+      .font({ size: 16 })
+      .cx(this._parentElement.clientWidth / 2)
+      .cy(this._parentElement.clientHeight / 2);
+
     // const legendContainer = document.createElement("div");
     // legendContainer.classList.add("legend-container");
 
@@ -216,8 +220,6 @@ export default class ChartViz implements VizClass {
     // legendContainer.appendChild(topFitnessColor);
     // legendContainer.appendChild(topFitnessLegend);
     // this._parentElement.appendChild(legendContainer);
-
-    // this.update();
 
     this._parentElement.dataset.initialized = "true";
   }
@@ -337,7 +339,7 @@ export default class ChartViz implements VizClass {
         newPlot.push(coords);
       });
 
-      (<any>this._plotLines[i]).animate(200).plot(newPlot);
+      (<any>this._plotLines[i]).animate(250).plot(newPlot);
     });
   }
 
@@ -460,7 +462,7 @@ class XAxisTick extends AxisTick {
 
   set x(x: number) {
     this._x = x + this._width;
-    this._group!.animate(300, ">").x(this._x);
+    this._group!.animate(250, ">").x(this._x);
   }
 }
 
