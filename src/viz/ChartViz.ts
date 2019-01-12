@@ -82,6 +82,17 @@ export default class ChartViz implements VizClass {
       display: flex;
       justify-content: center;
       align-items: center;
+
+      position: absolute;
+      bottom: 0;
+
+      width: 100%;
+      left: 0;
+      right: 0;
+    }
+
+    .${cssPrefix}${this._containerClassName} .legend-container p {
+      margin: 0.8em 0;
     }
 
     .${cssPrefix}${this._containerClassName} .legend-color {
@@ -141,8 +152,8 @@ export default class ChartViz implements VizClass {
     this._margin = {
       top: 30,
       right: 50,
-      bottom: 30,
-      left: 50
+      bottom: 60,
+      left: 60
     };
 
     this._bounds = {
@@ -200,26 +211,26 @@ export default class ChartViz implements VizClass {
       .cx(this._parentElement.clientWidth / 2)
       .cy(this._parentElement.clientHeight / 2);
 
-    // const legendContainer = document.createElement("div");
-    // legendContainer.classList.add("legend-container");
+    const legendContainer = document.createElement("div");
+    legendContainer.classList.add("legend-container");
 
-    // const fitnessLegend = document.createElement("p");
-    // const topFitnessLegend = document.createElement("p");
-    // fitnessLegend.innerText = "Fitness";
-    // topFitnessLegend.innerText = "Top Fitness";
+    const fitnessLegend = document.createElement("p");
+    const topFitnessLegend = document.createElement("p");
+    fitnessLegend.innerText = "Fitness";
+    topFitnessLegend.innerText = "Top Fitness";
 
-    // const fitnessColor = document.createElement("div");
-    // const topFitnessColor = document.createElement("div");
-    // fitnessColor.classList.add("legend-color");
-    // fitnessColor.classList.add("yellow");
-    // topFitnessColor.classList.add("legend-color");
-    // topFitnessColor.classList.add("blue");
+    const fitnessColor = document.createElement("div");
+    const topFitnessColor = document.createElement("div");
+    fitnessColor.classList.add("legend-color");
+    fitnessColor.classList.add("yellow");
+    topFitnessColor.classList.add("legend-color");
+    topFitnessColor.classList.add("blue");
 
-    // legendContainer.appendChild(fitnessColor);
-    // legendContainer.appendChild(fitnessLegend);
-    // legendContainer.appendChild(topFitnessColor);
-    // legendContainer.appendChild(topFitnessLegend);
-    // this._parentElement.appendChild(legendContainer);
+    legendContainer.appendChild(fitnessColor);
+    legendContainer.appendChild(fitnessLegend);
+    legendContainer.appendChild(topFitnessColor);
+    legendContainer.appendChild(topFitnessLegend);
+    this._parentElement.appendChild(legendContainer);
 
     this._parentElement.dataset.initialized = "true";
   }
