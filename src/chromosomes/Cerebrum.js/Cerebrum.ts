@@ -72,6 +72,7 @@ export default class Cerebrum {
 
   compute(inputs: number[]): number[] {
     for (let i = 0; i < inputs.length; i++) {
+      /* istanbul ignore next */
       if (this._layers[0] && this._layers[0].neurons[i]) {
         this._layers[0].neurons[i].value = inputs[i];
       }
