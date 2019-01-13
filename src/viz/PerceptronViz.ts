@@ -158,6 +158,10 @@ export default class PerceptronViz implements VizClass {
     canvas.id = this._canvasId;
     this._parentElement.appendChild(canvas);
 
+    window.addEventListener("resize", () => {
+      this.resize();
+    });
+
     this._options = options;
     this._heredity = heredity;
 
@@ -440,6 +444,32 @@ export default class PerceptronViz implements VizClass {
     return coords;
   }
 
+  resize() {
+    let graphCoords: number[][] = [];
+
+    if (this._chromosome !== undefined) {
+      graphCoords = this.genGraphCoords(this._chromosome);
+      this._graph = this.buildGraph(this._chromosome, graphCoords);
+    }
+
+    this._graph.links.forEach((n, i) => {
+      const target = this._graph.nodes.find(e => e.id === n.target);
+      const source = this._graph.nodes.find(e => e.id === n.source);
+      this._drawingLinks[i].setCoords(
+        target!.x,
+        target!.y,
+        source!.x,
+        source!.y
+      );
+    });
+
+    // TODO Optimize and move this to buildGraph()
+    this._graph.nodes.forEach((n, i) => {
+      this._drawingNodes[i].x = graphCoords[i][0];
+      this._drawingNodes[i].y = graphCoords[i][1];
+    });
+  }
+
   link(toLink: VizClass): boolean {
     if (toLink instanceof DnaViz) {
       toLink.onPillHover(this, (chrom: GenericChromosome<any>) => {
@@ -466,6 +496,7 @@ class NeuralNode {
   private _strokeColor: string;
   private _strokeWidth: number;
 
+  private _group: SVG.G;
   private _draw: SVG.Doc;
   private _text: SVG.Text;
   private _node: SVG.Circle;
@@ -513,8 +544,8 @@ class NeuralNode {
     //   .fill("#000")
     //   .move(this._x - 1, this._y - 1);
 
-    const group = this._draw.group();
-    group.move(this._x, this._y);
+    this._group = this._draw.group();
+    this._group.move(this._x, this._y);
 
     this._node = this._draw
       .circle(this._radius)
@@ -530,8 +561,8 @@ class NeuralNode {
       .plain("test")
       .font({ size: 12, anchor: "middle" })
       .cy(0);
-    group.add(this._node);
-    group.add(this._text);
+    this._group.add(this._node);
+    this._group.add(this._text);
   }
 
   set value(value: number) {
@@ -558,6 +589,16 @@ class NeuralNode {
     if (lastWidth !== width) {
       this._node.animate(80).attr({ "stroke-width": width });
     }
+  }
+
+  set x(x: number) {
+    this._x = x;
+    this._group.x(this._x);
+  }
+
+  set y(y: number) {
+    this._y = y;
+    this._group.y(this._y);
   }
 }
 
@@ -626,12 +667,37 @@ class NeuralNodeLink {
       .plain("test 2")
       .font({ size: 13, anchor: "middle" })
       .move(midpoint.x, midpoint.y - 8)
-      .rotate(rotate);
+      .rotate(rotate, midpoint.x, midpoint.y);
 
     // .x(Math.abs(this._x1 - this._x2) / 2);
 
     // group.add(line);
     // group.add(text);
+  }
+
+  setCoords(x1: number, y1: number, x2: number, y2: number) {
+    this._x1 = x1;
+    this._x2 = x2;
+    this._y1 = y1;
+    this._y2 = y2;
+
+    const midpoint = {
+      x: (this._x1 + this._x2) / 2,
+      y: (this._y1 + this._y2) / 2
+    };
+
+    const rotate =
+      (Math.atan2(this._y2 - this._y1, this._x2 - this._x1) * 180) / Math.PI;
+
+    this._line.plot(this._x1, this._y1, this._x2, this._y2);
+
+    this._text
+      .x(midpoint.x)
+      .y(midpoint.y - 8)
+      .attr("transform", `rotate(${rotate} ${midpoint.x},${midpoint.y})`);
+    // .rotate(0);
+    // .rotate(rotate);
+    this._text.rotate(rotate);
   }
 
   set value(value: number) {
