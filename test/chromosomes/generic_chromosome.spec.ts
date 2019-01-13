@@ -35,4 +35,38 @@ describe("Generic Chromosome", () => {
     chrom.genes = [5, 5, 5, 5, 5];
     expect(chrom.genes).toEqual([5, 5, 5, 5, 5]);
   });
+
+  test("Get Colors", () => {
+    const colors = chrom.getColorsHue();
+
+    // Should be empty because it's the generic class
+    expect(colors).toEqual([]);
+  });
+
+  test("Tag Manager add", () => {
+    chrom.tags.add("dead");
+    expect(chrom.tags.has("dead")).toBeTruthy();
+  });
+
+  test("Tag Manager clear", () => {
+    chrom.tags.add("test");
+    chrom.tags.clear();
+    expect(chrom.tags.size).toEqual(0);
+  });
+
+  test("Tag Manager delete", () => {
+    chrom.tags.add("test");
+    chrom.tags.add("test");
+    chrom.tags.delete("test 2");
+    expect(chrom.tags.size).toEqual(1);
+  });
+
+  test("Tag Manager onChange", () => {
+    const hook = jest.fn();
+    chrom.tags.onChange(null, hook);
+    chrom.tags.add("test");
+    chrom.tags.clear();
+    chrom.tags.delete("clear");
+    expect(hook).toBeCalledTimes(3);
+  });
 });
