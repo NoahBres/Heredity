@@ -68,4 +68,42 @@ describe("Heredity", () => {
 
     expect(d.getGenesFlat()).not.toStrictEqual(p.getGenesFlat());
   });
+
+  test("Generate Population PreHook", () => {
+    const hook = jest.fn();
+
+    d.addHook("genPopPre", null, hook);
+    d.generatePopulation();
+
+    expect(hook).toBeCalled();
+  });
+
+  test("Generate Population PostHook", () => {
+    const hook = jest.fn();
+
+    d.addHook("genPopPost", null, hook);
+    d.generatePopulation();
+
+    expect(hook).toBeCalled();
+  });
+
+  test("Next Generation PreHook", () => {
+    const hook = jest.fn();
+
+    d.addHook("nextGenPre", null, hook);
+    d.generatePopulation();
+    d.nextGeneration();
+
+    expect(hook).toBeCalled();
+  });
+
+  test("Next Generation PostHook", () => {
+    const hook = jest.fn();
+
+    d.addHook("nextGenPost", null, hook);
+    d.generatePopulation();
+    d.nextGeneration();
+
+    expect(hook).toBeCalled();
+  });
 });
