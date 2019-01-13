@@ -6,6 +6,7 @@ import { timingSafeEqual } from "crypto";
 // TODO Move ticsk to their own axis groups
 // TODO Don't remove ticks that don't need to be removed
 // TODO give the option to start the graph at 0 rather than the lowest number
+// TODO add nodes on hover
 
 export default class ChartViz implements VizClass {
   _heredity: Heredity;
@@ -33,11 +34,11 @@ export default class ChartViz implements VizClass {
   private _plotLines: SVG.PolyLine[] = [];
   private _plotLineWidth = 2;
 
-  private _margin?: {
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
+  private _margin = {
+    top: 30,
+    right: 50,
+    bottom: 60,
+    left: 60
   };
 
   private _bounds?: {
@@ -149,13 +150,6 @@ export default class ChartViz implements VizClass {
       return;
     }
 
-    this._margin = {
-      top: 30,
-      right: 50,
-      bottom: 60,
-      left: 60
-    };
-
     this._bounds = {
       top: this._margin.top,
       right: this._parentElement.clientWidth - this._margin.left,
@@ -232,6 +226,10 @@ export default class ChartViz implements VizClass {
     legendContainer.appendChild(topFitnessLegend);
     this._parentElement.appendChild(legendContainer);
 
+    window.addEventListener("resize", () => {
+      this.resize();
+    });
+
     this._parentElement.dataset.initialized = "true";
   }
 
@@ -261,7 +259,7 @@ export default class ChartViz implements VizClass {
 
     const xMax = this._chartData.fitness.values.length - 1;
     this._xAxisTicks.forEach((n, i) => {
-      n.x = (i / xMax) * this._graphWidth + this._bounds!.left;
+      n.setX((i / xMax) * this._graphWidth + this._bounds!.left);
     });
 
     this._xAxisTicks.push(
@@ -303,7 +301,9 @@ export default class ChartViz implements VizClass {
       300,
       500,
       750,
-      1000
+      1000,
+      5000,
+      10000
     ];
 
     const difference = yMax - yMin;
@@ -346,7 +346,7 @@ export default class ChartViz implements VizClass {
             this._bounds!.top
         ];
 
-        console.log(n - yMin / (yMax - yMin === 0 ? 1 : yMax - yMin));
+        // console.log(n - yMin / (yMax - yMin === 0 ? 1 : yMax - yMin));
         newPlot.push(coords);
       });
 
@@ -383,10 +383,11 @@ export default class ChartViz implements VizClass {
           this._canvas!
         );
 
-        newTick.y =
+        newTick.setY(
           this._bounds!.top +
-          (this._bounds!.bottom - this._bounds!.top - this._axisTickWidth) *
-            (i / Math.max(arr.length - 1, 1));
+            (this._bounds!.bottom - this._bounds!.top - this._axisTickWidth) *
+              (i / Math.max(arr.length - 1, 1))
+        );
 
         ticks.push(newTick);
       });
@@ -405,6 +406,73 @@ export default class ChartViz implements VizClass {
     if (num > n) num -= toRound;
 
     return num;
+  }
+
+  resize() {
+    this._bounds = {
+      top: this._margin.top,
+      right: this._parentElement.clientWidth - this._margin.left,
+      bottom: this._parentElement.clientHeight - this._margin.bottom,
+      left: this._margin.left
+    };
+
+    this._graphWidth = this._bounds.right - this._bounds.left;
+    this._graphHeight = this._bounds.bottom - this._bounds.top;
+
+    this._axisXLine!.width(
+      this._bounds.right - this._bounds.left + this._axisStrokeWidth
+    ).height(this._axisStrokeWidth);
+    this._axisYLine!.width(this._axisStrokeWidth).height(
+      this._bounds.bottom - this._bounds.top + this._axisStrokeWidth
+    );
+
+    const xMax = this._chartData.fitness.values.length - 1;
+    this._xAxisTicks.forEach((n, i) => {
+      n.setX(
+        (i / xMax) * (this._graphWidth - this._axisTickWidth) +
+          this._bounds!.left,
+        false
+      );
+    });
+
+    this._yAxisTicks.forEach((n, i, arr) => {
+      n.setY(
+        this._bounds!.top +
+          (this._bounds!.bottom - this._bounds!.top - this._axisTickWidth) *
+            (i / Math.max(arr.length - 1, 1)),
+        false
+      );
+    });
+
+    let yMin = this._chartData.fitness.values[0];
+    let yMax = this._chartData.fitness.values[0];
+
+    Object.values(this._chartData).forEach(obj => {
+      const yMaxLocal = Math.max(...obj.values);
+      const yMinLocal = Math.min(...obj.values);
+
+      yMin = Math.min(yMin, yMinLocal);
+      yMax = Math.max(yMax, yMaxLocal);
+    });
+
+    Object.values(this._chartData).forEach((n, i) => {
+      if (n.values.length === 1) return;
+      const newPlot: number[][] = [];
+
+      n.values.forEach((n, i) => {
+        const coords = [
+          (i / (xMax === 0 ? 1 : xMax)) * this._graphWidth + this._bounds!.left,
+          (1 - (n - yMin) / (yMax - yMin === 0 ? 1 : yMax - yMin)) *
+            this._graphHeight +
+            this._bounds!.top
+        ];
+
+        // console.log(n - yMin / (yMax - yMin === 0 ? 1 : yMax - yMin));
+        newPlot.push(coords);
+      });
+
+      (<any>this._plotLines[i]).plot(newPlot);
+    });
   }
 
   link(toLink: VizClass): boolean {
@@ -471,9 +539,14 @@ class XAxisTick extends AxisTick {
     this._group.add(this._text);
   }
 
-  set x(x: number) {
+  setX(x: number, animate = true) {
     this._x = x + this._width;
-    this._group!.animate(250, ">").x(this._x);
+    this._group!.stop(true, true);
+    if (animate) {
+      this._group!.animate(250, ">").x(this._x);
+    } else {
+      this._group!.x(this._x);
+    }
   }
 }
 
@@ -495,9 +568,14 @@ class YAxisTick extends AxisTick {
     this._group.add(this._text);
   }
 
-  set y(y: number) {
+  setY(y: number, animate = true) {
     this._y = y;
-    this._group!.animate(300, ">").y(this._y);
+    this._group!.stop(true, true);
+    if (animate) {
+      this._group!.animate(300, ">").y(this._y);
+    } else {
+      this._group!.y(this._y);
+    }
   }
 
   remove() {
