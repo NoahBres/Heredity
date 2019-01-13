@@ -12,7 +12,8 @@ export default class NeuralChromosome extends NumberChromosome {
     { inputLength, hiddenLength, outputLength, activation }: ConstructorOptions,
     length: number,
     genes: number[] = [],
-    score: number
+    score: number = 0,
+    cerebrum?: Cerebrum
   ) {
     super(
       {
@@ -33,12 +34,16 @@ export default class NeuralChromosome extends NumberChromosome {
       activation
     };
 
-    this._cerebrum = new Cerebrum(
-      inputLength,
-      hiddenLength,
-      outputLength,
-      activation
-    );
+    if (cerebrum) {
+      this._cerebrum = cerebrum;
+    } else {
+      this._cerebrum = new Cerebrum(
+        inputLength,
+        hiddenLength,
+        outputLength,
+        activation
+      );
+    }
   }
 
   generate(): NeuralChromosome {
@@ -50,7 +55,8 @@ export default class NeuralChromosome extends NumberChromosome {
       this._cerebrumOptions,
       this._length,
       this._genes,
-      this._fitness
+      this._fitness,
+      this._cerebrum
     );
   }
 
