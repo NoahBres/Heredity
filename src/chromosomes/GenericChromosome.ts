@@ -20,11 +20,11 @@
  * ```
  */
 
-export default class GenericChromosome<T> {
+export default class GenericChromosome<GeneType> {
   /** Fitness of chromosome. */
   protected _fitness: number;
   /** Gene list of chromosome. Takes type T. */
-  protected _genes: T[];
+  protected _genes: GeneType[];
   /** Length of chromosome. Primarily used for generation. */
   protected _length: number = 0;
 
@@ -45,7 +45,7 @@ export default class GenericChromosome<T> {
    * @param genes Array of gene values
    * @param score Fitness of the chromosome
    */
-  constructor(length: number, genes: T[] = [], score: number = 0) {
+  constructor(length: number, genes: GeneType[] = [], score: number = 0) {
     this._length = length;
     this._genes = genes;
     this._fitness = score;
@@ -56,12 +56,12 @@ export default class GenericChromosome<T> {
   }
 
   /** Returns duplicated chromosome */
-  duplicate(): GenericChromosome<T> {
+  duplicate(): GenericChromosome<GeneType> {
     return new GenericChromosome(this._length, this._genes, this._fitness);
   }
 
   /** Generate function. To be overriden. */
-  generate(): GenericChromosome<T> {
+  generate(): GenericChromosome<GeneType> {
     this._genes = Array(this._length);
 
     return this;
@@ -79,11 +79,11 @@ export default class GenericChromosome<T> {
     this._fitness = fitness;
   }
 
-  get genes(): T[] {
+  get genes(): GeneType[] {
     return this._genes;
   }
 
-  set genes(genes: T[]) {
+  set genes(genes: GeneType[]) {
     this._genes = genes;
   }
 
