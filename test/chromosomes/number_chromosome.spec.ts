@@ -45,7 +45,7 @@ describe("Number Chromosome", () => {
     const dupe1 = chrom1.duplicate();
     const dupe2 = chrom2.duplicate();
     expect(dupe1).toEqual(chrom1);
-    expect(dupe1).toEqual(chrom1);
+    expect(dupe2).toEqual(chrom2);
     expect(dupe1).not.toEqual(dupe2);
   });
 
@@ -76,5 +76,14 @@ describe("Number Chromosome", () => {
     for (const gene of chrom2.genes) {
       expect(gene % 1 === 0).toBeTruthy();
     }
+  });
+
+  test("Get Colors Hue", () => {
+    chrom1.generate();
+    const colors = chrom1.getColorsHue();
+    colors.forEach(c => {
+      expect(c).toBeGreaterThanOrEqual(0);
+      expect(c).toBeLessThanOrEqual(255);
+    });
   });
 });
