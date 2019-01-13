@@ -695,9 +695,6 @@ class NeuralNodeLink {
       .x(midpoint.x)
       .y(midpoint.y - 8)
       .attr("transform", `rotate(${rotate} ${midpoint.x},${midpoint.y})`);
-    // .rotate(0);
-    // .rotate(rotate);
-    this._text.rotate(rotate);
   }
 
   set value(value: number) {
