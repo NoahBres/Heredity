@@ -56,7 +56,6 @@
   },
   "homepage": "https://github.com/NoahBres/Heredity#readme",
   "devDependencies": {
-    "@types/d3": "^5.0.1",
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.9",
     "jest": "^23.6.0",
