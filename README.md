@@ -6,6 +6,8 @@
 
 - Remove comments
 - Optimize dom manipulation in visualizations
+- Add getColors to the other chromosomes
+- Add new chromosomes
 
 ## Todo v1.5
 
