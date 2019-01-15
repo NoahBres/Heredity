@@ -4,6 +4,7 @@ import GenericChromosome from "../chromosomes/GenericChromosome";
 
 // TODO Move DNAPill to separate class
 // TODO Add animation to spawn
+// TODO Replace stuff with VizClass name
 
 export default class TopGeneViz implements VizClass {
   _heredity: Heredity;
@@ -64,7 +65,7 @@ export default class TopGeneViz implements VizClass {
   private _styleId = "top-genes-style-id";
 
   constructor(parentElement: string | HTMLElement, heredity: Heredity) {
-    if (parentElement instanceof String) {
+    if (typeof parentElement === "string" || parentElement instanceof String) {
       this._parentElement = <HTMLElement>(
         document.getElementById(<string>parentElement)
       );
@@ -89,6 +90,7 @@ export default class TopGeneViz implements VizClass {
   init() {}
 
   update() {
+    /* istanbul ignore next */
     if (!this._emptyTextElement.classList.contains("hidden")) {
       this._emptyTextElement.classList.add("hidden");
     }
