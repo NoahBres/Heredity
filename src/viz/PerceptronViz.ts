@@ -136,7 +136,7 @@ export default class PerceptronViz implements VizClass {
       threshhold?: (i: number) => boolean;
     }
   ) {
-    if (parentElement instanceof String) {
+    if (typeof parentElement === "string" || parentElement instanceof String) {
       this._parentElement = <HTMLElement>(
         document.getElementById(<string>parentElement)
       );

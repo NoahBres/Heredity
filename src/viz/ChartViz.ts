@@ -121,7 +121,7 @@ export default class ChartViz implements VizClass {
   private _styleId = "chart-viz-style-id";
 
   constructor(parentElement: string | HTMLElement, heredity: Heredity) {
-    if (parentElement instanceof String) {
+    if (typeof parentElement === "string" || parentElement instanceof String) {
       this._parentElement = <HTMLElement>(
         document.getElementById(<string>parentElement)
       );
