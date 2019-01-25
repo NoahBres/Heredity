@@ -13,7 +13,7 @@ export default class DnaViz implements VizClass {
 
   private _dnaPills: Map<GenericChromosome<any>, DnaPill> = new Map();
 
-  private _lastChromosomeList = [];
+  private _lastChromosomeList: GenericChromosome<any>[] = [];
 
   private _onPillHoverListeners: PillListenerObject[] = [];
   private _onPillHoverLeaveListeners: PillListenerObject[] = [];
@@ -55,6 +55,7 @@ export default class DnaViz implements VizClass {
       c.tags.onChange(this, chromosome => {
         // To suppress object is possibly undefined error
         const pilly = this._dnaPills.get(chromosome);
+        /* istanbul ignore next */
         if (pilly) pilly!.update();
       });
     });
@@ -110,11 +111,14 @@ export default class DnaViz implements VizClass {
         c.tags.onChange(this, chromosome => {
           // To suppress object is possibly undefined error
           const pilly = this._dnaPills.get(chromosome);
+          /* istanbul ignore next */
           if (pilly) {
             pilly!.update();
           }
         });
       });
+
+      this._lastChromosomeList = this._heredity.chromosomes;
     }
 
     // Not optimized well
@@ -137,22 +141,9 @@ export default class DnaViz implements VizClass {
     this._onPillHoverLeaveListeners.push({ thisVal, listener });
   }
 
-  childCallingMouseHover(chromosome: GenericChromosome<any>) {
-    this._onPillHoverListeners.forEach(l => {
-      l.listener.apply(l.thisVal, [chromosome]);
-    });
-  }
-
-  childCallingMouseHoverLeave(chromosome: GenericChromosome<any>) {
-    this._onPillHoverLeaveListeners.forEach(l => {
-      l.listener.apply(l.thisVal, [chromosome]);
-    });
-  }
-
   link(toLink: VizClass): boolean {
     if (toLink instanceof PerceptronViz) {
-      toLink.link(this);
-      return true;
+      return toLink.link(this);
     }
     return false;
   }
