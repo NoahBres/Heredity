@@ -1,7 +1,8 @@
 import Heredity from "../Heredity";
 import { default as VizClass, injectStylesheet, cssPrefix } from "./VizClass";
 import * as SVG from "svg.js";
-import { timingSafeEqual } from "crypto";
+
+// import { Doc, Text, Rect, PolyLine } from "svg.js";
 
 // TODO Move ticsk to their own axis groups
 // TODO Don't remove ticks that don't need to be removed
