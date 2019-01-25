@@ -190,6 +190,8 @@ export class DnaPill {
         // Not sure why appendChild isn't working
         this._element.innerHTML += e.outerHTML;
       });
+
+      this._dirty = false;
     }
   }
 
