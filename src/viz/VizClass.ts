@@ -214,6 +214,11 @@ export class DnaPill {
     this._onHoverLeaveListeners.push({ thisVal, listener });
   }
 
+  set alternativeClassName(className: string) {
+    this._alternativeClassName = className;
+    this._dirty = true;
+  }
+
   get baseClassName(): string {
     return this._baseClassName;
   }
