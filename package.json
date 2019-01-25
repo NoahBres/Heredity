@@ -12,6 +12,7 @@
     "bundle": "webpack",
     "lint": "tslint --format stylish --project \"./tsconfig.json\"",
     "test": "jest --color --coverage --notify",
+    "test:watch": "jest --watch --color",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "api": "typedoc src/ --out api/ --theme minimal --name Heredity --mode modules --hideGenerator --exclude '**/*+(index).ts'",
     "prepare": "yarn build:all",
