@@ -36,7 +36,17 @@
       "json",
       "node"
     ],
-    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$"
+    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/test/viz/ChartViz.spec.ts",
+      "<rootDir>/test/viz/PerceptronViz.spec.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/src/viz/ChartViz.ts",
+      "<rootDir>/src/viz/PerceptronViz.ts"
+    ]
   },
   "repository": {
     "type": "git",
