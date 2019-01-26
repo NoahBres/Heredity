@@ -99,6 +99,7 @@ export default class NumberChromosome extends GenericChromosome<number> {
     return this;
   }
 
+  /** Returns an array of hue values (integers from 0-255) based on the value of the genes */
   getColorsHue(): number[] {
     const colors = this._genes.map(x => {
       function map(
