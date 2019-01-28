@@ -107,10 +107,14 @@ export default class Heredity {
   /** Current population of chromosomes */
   private _population: Population;
 
+  /** Function hooks running before generatePopulation() */
   private _genPopPreHook: HookObject[] = [];
+  /** Function hooks running after generatePopulation() */
   private _genPopPostHook: HookObject[] = [];
 
+  /** Function hooks running before nextGeneration() */
   private _nextGenPreHook: HookObject[] = [];
+  /** Function hooks running after nextGeneration() */
   private _nextGenPostHook: HookObject[] = [];
 
   /**
@@ -169,6 +173,18 @@ export default class Heredity {
   /**
    * Generates a brand new randomized population.
    * Will wipe the current population.
+   *
+   * @example
+   * ```typescript
+   *
+   * const h = new Heredity({
+   *    populationSize: 50
+   *    templateChromosome: new NumberChromosome({}, 5)
+   * });
+   *
+   * h.generatePopulation();
+   * // Randomized, new population generated
+   * ```
    */
   generatePopulation(): Heredity {
     this._genPopPreHook.forEach(e => {
@@ -187,7 +203,23 @@ export default class Heredity {
   /**
    * Evolves the next generation.
    * Performs selection, mutation, and crossover.
-   * Past generation is pushed to history[] arraya\
+   * Past generation is pushed to history[] array.
+   *
+   * @example
+   * ```typescript
+   *
+   * const h = new Heredity({
+   *    populationSize: 50
+   *    templateChromosome: new NumberChromosome({}, 5)
+   * });
+   *
+   * h.generatePopulation();
+   *
+   * h.nextGeneration();
+   * // Current generation pushed into h.history
+   * // Current generation undergoes evolution
+   * // New evolved generation is created
+   * ```
    */
   nextGeneration(): Heredity {
     this._nextGenPreHook.forEach(e => {
@@ -266,7 +298,45 @@ export default class Heredity {
     return this;
   }
 
-  addHook(type: string, thisVal: any, fn: () => void) {
+  /**
+   * Allows you to hook into various functions and run your own tasks prior and post each function run.
+   *
+   * @param type Specify the type of hook. Options: [ "genPopPre", "genPopPost", "nextGenPre", "nextGenPost" ]
+   * @param thisVal `this` value to be passed into the hook function
+   * @param fn Hook function to be passed in
+   *
+   * @example
+   * ```typescript
+   *
+   * const h = new Heredity({
+   *    populationSize: 50
+   *    templateChromosome: new NumberChromosome({}, 5)
+   * });
+   *
+   * h.addHook('genPopPre', () => {
+   *    console.log('I run prior to generatePopulation()');
+   * });
+   * h.addHook('genPopPost', () => {
+   *     console.log('I run after generatePopulation()');
+   * });
+   *
+   * h.generatePopulation();
+   * // console: I run prior to generatePopulation();
+   * // console: I run after generatePopulation();
+   *
+   * h.addHook('nextGenPre', () => {
+   *    console.log('I run prior to nextGeneration()');
+   * });
+   * h.addHook('nextGenPost', () => {
+   *     console.log('I run after nextGeneration()');
+   * });
+   *
+   * h.nextGeneration();
+   * // console: I run prior to nextGeneration();
+   * // console: I run after nextGeneration();
+   * ```
+   */
+  addHook(type: string, fn: () => void, thisVal?: any) {
     switch (type) {
       case "genPopPre":
         this._genPopPreHook.push({ thisVal, fn });
@@ -284,7 +354,7 @@ export default class Heredity {
   }
 
   /**
-   * Set <code>fitness</code>
+   * Set <code>fitness</code>.
    * Can either set entire population or single index
    * @param scores Accepts array of numbers or a single number
    * @param index The index to set if scores is not an array
@@ -292,7 +362,7 @@ export default class Heredity {
    * @example
    * ```typescript
    *
-   * // Sets the of the entire population
+   * // Sets the fitness of the entire population
    * h.setFitness([ 5, 10, 8 ]);
    * // Sets the fitness of chromosome at index 5 to 10
    * h.setFitness(10, 5);
@@ -305,7 +375,9 @@ export default class Heredity {
   /**
    * Returns highest chromsome
    * @returns Object formatted in TopChromosmeObject interface
+   *
    * ```typescript
+   *
    * p.topChromosome();
    * // {
    * //   index: 4,
@@ -321,7 +393,9 @@ export default class Heredity {
   /**
    * Returns lowest chromsome
    * @returns Object formatted in `TopChromosmeObject` interface
+   *
    * ```typescript
+   *
    * h.lowestChromosome();
    * // {
    * //   index: 1,
