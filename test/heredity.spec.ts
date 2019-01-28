@@ -72,7 +72,7 @@ describe("Heredity", () => {
   test("Generate Population PreHook", () => {
     const hook = jest.fn();
 
-    d.addHook("genPopPre", null, hook);
+    d.addHook("genPopPre", hook);
     d.generatePopulation();
 
     expect(hook).toBeCalled();
@@ -81,7 +81,7 @@ describe("Heredity", () => {
   test("Generate Population PostHook", () => {
     const hook = jest.fn();
 
-    d.addHook("genPopPost", null, hook);
+    d.addHook("genPopPost", hook);
     d.generatePopulation();
 
     expect(hook).toBeCalled();
@@ -90,7 +90,7 @@ describe("Heredity", () => {
   test("Next Generation PreHook", () => {
     const hook = jest.fn();
 
-    d.addHook("nextGenPre", null, hook);
+    d.addHook("nextGenPre", hook);
     d.generatePopulation();
     d.nextGeneration();
 
@@ -100,7 +100,7 @@ describe("Heredity", () => {
   test("Next Generation PostHook", () => {
     const hook = jest.fn();
 
-    d.addHook("nextGenPost", null, hook);
+    d.addHook("nextGenPost", hook);
     d.generatePopulation();
     d.nextGeneration();
 
