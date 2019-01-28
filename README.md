@@ -33,9 +33,9 @@
 
 - [x] crossovers.ts
 - [x] Heredity.ts
-- [ ] mutation.ts
-- [ ] Population.ts
-- [ ] seleciton.ts
+- [x] mutation.ts
+- [x] Population.ts
+- [x] seleciton.ts
 - [ ] viz/ChartViz.ts
 - [ ] viz/DnaViz.ts
 - [ ] viz/PerceptronViz.ts

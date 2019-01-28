@@ -56,7 +56,21 @@ export default class Population {
   /**
    * Generates a randomized population using the template chromsome.
    * Calls <code>templateChromosome.generate()</code> to get generated chromosomes
+   *
    * @param templateChromosome
+   *
+   * @example
+   * ```typescript
+   * const p = new Population(3);
+   *
+   * p.chromosomes
+   * // [ undefined, undefined, undefined ]
+   *
+   * p.generate(new NumberChromosome({}, 5));
+   * p.chromosomes
+   * // [ NumberChromosome, NumberChromosome, NumberChromosome ]
+   * // Contains 3 generated NumberChromosomes based off of the NumberChromosomes template
+   * ```
    */
   generate(templateChromosome: GenericChromosome<any>): Population {
     this._chromosomes = [];
@@ -70,7 +84,7 @@ export default class Population {
     return this;
   }
 
-  /** Returns duplicate population */
+  /** @returns Returns duplicate population */
   duplicate(): Population {
     return new Population(this._size, this._chromosomes);
   }
@@ -78,7 +92,9 @@ export default class Population {
   /**
    * Returns highest chromsome
    * @returns Object formatted in TopChromosmeObject interface
+   *
    * ```typescript
+   *
    * p.topChromosome();
    * // {
    * //   index: 4,
@@ -110,7 +126,9 @@ export default class Population {
   /**
    * Returns lowest chromsome
    * @returns Object formatted in `TopChromosmeObject` interface
+   *
    * ```typescript
+   *
    * p.lowestChromosome();
    * // {
    * //   index: 1,
