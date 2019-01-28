@@ -10,6 +10,9 @@
 - Add new chromosomes
 - Create getter for the viz style ids and rewrite the tests to utilize that
 - Change tests to utilize variable div id
+- Search all files for TODO
+- Move addHook parameters around in Heredity.ts. Move fn before thisVal
+- Add examples to all public facing functions
 
 ## Todo v1.5
 
@@ -18,9 +21,32 @@
 - Fix perceptron viz death switch to another gene issue
 - Add animations to visualizations
 - Change hover listener apis. Move this to second parameter to make default null
+- Add this autobinding for addHook
 
 ## Todo v2
 
 - Remove d3. Draw manually with canvas/svg
 - Turn visualization modules into custom web components
 - Advanced visualization
+
+## Documentation todo
+
+- [x] crossovers.ts
+- [x] Heredity.ts
+- [ ] mutation.ts
+- [ ] Population.ts
+- [ ] seleciton.ts
+- [ ] viz/ChartViz.ts
+- [ ] viz/DnaViz.ts
+- [ ] viz/PerceptronViz.ts
+- [ ] viz/TopGenesViz.ts
+- [ ] viz/VizClassViz.ts
+- [ ] chromosomes/BitChromosomes.ts
+- [ ] chromosomes/GenericChromosome.ts
+- [ ] chromosomes/NeuralChromosome.ts
+- [ ] chromosomes/NumberChromosome.ts
+- [ ] Cerebrum.js/BitChromosome.ts
+- [ ] Cerebrum.js/Cerebrum.ts
+- [ ] Cerebrum.js/CerebrumData.ts
+- [ ] Cerebrum.js/Layer.ts
+- [ ] Cerebrum.js/Neuron.ts
