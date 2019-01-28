@@ -83,8 +83,8 @@ export default class TopGeneViz implements VizClass {
     this._emptyTextElement.classList.add("viz__top-genes-hidden-text");
     this._parentElement.appendChild(this._emptyTextElement);
 
-    heredity.addHook("genPopPost", this, this.init);
-    heredity.addHook("nextGenPost", this, this.update);
+    heredity.addHook("genPopPost", this.init, this);
+    heredity.addHook("nextGenPost", this.update, this);
   }
 
   init() {}

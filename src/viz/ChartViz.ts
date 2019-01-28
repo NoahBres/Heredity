@@ -141,8 +141,8 @@ export default class ChartViz implements VizClass {
 
     this._heredity = heredity;
 
-    heredity.addHook("genPopPost", this, this.init);
-    heredity.addHook("nextGenPost", this, this.update);
+    heredity.addHook("genPopPost", this.init, this);
+    heredity.addHook("nextGenPost", this.update, this);
   }
 
   init() {
