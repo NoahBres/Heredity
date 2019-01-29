@@ -50,6 +50,16 @@ describe("Char Viz", () => {
     expect(updateSpy).toHaveBeenCalled();
   });
 
+  test("Disable hook", () => {
+    viz = new ChartViz("chart-viz", heredity, true);
+
+    heredity.generatePopulation();
+    heredity.nextGeneration();
+
+    expect(initSpy).not.toHaveBeenCalled();
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
   test("Link", () => {
     expect(viz.link(viz)).toBeFalsy();
   });
