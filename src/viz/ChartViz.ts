@@ -9,32 +9,102 @@ import * as SVG from "svg.js";
 // TODO give the option to start the graph at 0 rather than the lowest number
 // TODO add nodes on hover
 
+/**
+ * ## ChartViz
+ * A visualization detailing the fitness and maximum fitness in a line chart.
+ *
+ * #### Basic usage
+ * @example
+ * ```html
+ *
+ * <html>
+ *    <body>
+ *       <!-- Your html content -->
+ *
+ *        <div id="chart-viz-element">
+ *            <!-- This div should be empty -->
+ *        </div>
+ *
+ *        <script src="main.js"></script>
+ *    </body>
+ * </html>
+ * ```
+ *
+ * @example
+ * ```typescript
+ *
+ * import { Heredity } from "heredity";
+ * import { ChartViz } from "heredity";
+ *
+ * const heredity = new Heredity({
+ *    populationSize: 50
+ *    templateChromosome: new NumberChromosome({}, 5)
+ * });
+ *
+ * const chartViz = new ChartViz(
+ *     document.getElementById("chart-viz-element")
+ *     heredity
+ * );
+ *
+ * // ChartViz will now automatically update by itself.
+ * // No need to do anything else
+ *
+ * heredity.generatePopulation();
+ * // ChartViz will update
+ * heredity.nextGeneration();
+ * // ChartViz will update
+ *```
+ *
+ *
+ * #### Note:
+ * VizClass visualizations is designed to be set and forget. Meaning you simply initialize the
+ * object and it will handle updating by itself automatically. It does this by utilizing the
+ * addHook() function of Heredity. If you would like to control updating yourself, disable hooks through the disableHook parameter
+ *
+ */
 export default class ChartViz implements VizClass {
+  /** Parent Heredity object */
   _heredity: Heredity;
+  /** Parent HTML element */
   _parentElement: HTMLElement;
 
+  /** Class name to prepend to children elements. Used to manage styling. */
   private readonly _containerClassName = "chart-container";
 
+  /** Object to draw SVG on */
   private _canvas?: SVG.Doc;
+  /** ID of the canvas */
   private readonly _canvasId = `${cssPrefix}chart-viz-canvas`;
 
+  /** Text indicating that there is no data */
   private _noDataText?: SVG.Text;
+  /** Toggle the view of the  noDataText  */
   private _noDataTextRemoved = false;
 
+  /** SVG.js object drawing the X axis line */
   private _axisXLine?: SVG.Rect;
+  /** SVG.js object drawing the Y axis line */
   private _axisYLine?: SVG.Rect;
 
+  /** Width of the axes */
   private _axisStrokeWidth = 3;
+  /** Width of the ticks on the axes */
   private _axisTickWidth = 2;
 
+  /** Array of the ticks on the X Axis */
   private _xAxisTicks: XAxisTick[] = [];
+  /** Array of the ticks on the Y Axis */
   private _yAxisTicks: YAxisTick[] = [];
 
+  /** Last maximum Y. Used to check if ticks need to be redrawn. */
   private _lastMaxY = 0;
 
+  /** Array of lines used in the chart */
   private _plotLines: SVG.PolyLine[] = [];
+  /** Width of the lines */
   private _plotLineWidth = 2;
 
+  /** Margin of the chart */
   private _margin = {
     top: 30,
     right: 50,
@@ -42,6 +112,7 @@ export default class ChartViz implements VizClass {
     left: 60
   };
 
+  /** Coordinates of the corners of the chart accounting for margin + width */
   private _bounds?: {
     top: number;
     right: number;
@@ -49,10 +120,16 @@ export default class ChartViz implements VizClass {
     left: number;
   };
 
+  /** Calculated width of the graph */
   private _graphWidth = 0;
+  /** Calculated height of the graph */
   private _graphHeight = 0;
 
-  // The order of the objects affects it's drawing order. So lower on the objects == drawn on top
+  /**
+   * ChartData contains all the various data types collected.
+   * Basically just an object wrapper for ChartDataType.
+   * Heads up: the order of the objects affects it's drawing order. So lower on the objects == drawn on top
+   */
   private _chartData: ChartDataType = {
     fitness: {
       name: "Fitness",
@@ -66,6 +143,7 @@ export default class ChartViz implements VizClass {
     }
   };
 
+  /** Styling of the ChartViz component */
   private _style = `
     .${cssPrefix}${this._containerClassName} {
       display: flex;
@@ -119,9 +197,37 @@ export default class ChartViz implements VizClass {
     }
   `;
 
+  /** ID given to the style element */
   private _styleId = "chart-viz-style-id";
 
-  constructor(parentElement: string | HTMLElement, heredity: Heredity) {
+  /**
+   * You can call ChartViz with either a string or HTMLElement as the first parameter.
+   * Setting the parentElement parameter to a string will simply do a document.getElementById("") search
+   *
+   * @example
+   * ```typescript
+   *
+   * const heredity = new Heredity({
+   *    populationSize: 50
+   *    templateChromosome: new NumberChromosome({}, 5)
+   * });
+   *
+   * // Set by string id
+   * const chart = new ChartViz('chart-viz-element', heredity);
+   *
+   * // Or set by manual html element
+   * const chart = new ChartViz(document.getElementById('chart-viz-element'), heredity);
+   * ```
+   *
+   * @param parentElement HTML element that the visualization will insert itself in. Should be a blank div.
+   * @param heredity Heredity object where ChartViz will pull it's data from
+   * @param disableHooks Choose to disable hooking into Heredity for manual control of the init and update functions
+   */
+  constructor(
+    parentElement: string | HTMLElement,
+    heredity: Heredity,
+    disableHooks: boolean = false
+  ) {
     if (typeof parentElement === "string" || parentElement instanceof String) {
       this._parentElement = <HTMLElement>(
         document.getElementById(<string>parentElement)
@@ -141,8 +247,10 @@ export default class ChartViz implements VizClass {
 
     this._heredity = heredity;
 
-    heredity.addHook("genPopPost", this.init, this);
-    heredity.addHook("nextGenPost", this.update, this);
+    if (!disableHooks) {
+      heredity.addHook("genPopPost", this.init, this);
+      heredity.addHook("nextGenPost", this.update, this);
+    }
   }
 
   init() {

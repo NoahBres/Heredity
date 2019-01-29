@@ -134,7 +134,8 @@ export default class PerceptronViz implements VizClass {
       index?: number;
       chromosome?: NeuralChromosome;
       threshhold?: (i: number) => boolean;
-    }
+    },
+    disableHooks: boolean = false
   ) {
     if (typeof parentElement === "string" || parentElement instanceof String) {
       this._parentElement = <HTMLElement>(
@@ -165,8 +166,10 @@ export default class PerceptronViz implements VizClass {
     this._options = options;
     this._heredity = heredity;
 
-    heredity.addHook("genPopPost", this.init, this);
-    heredity.addHook("nextGenPost", this.update, this);
+    if (!disableHooks) {
+      heredity.addHook("genPopPost", this.init, this);
+      heredity.addHook("nextGenPost", this.update, this);
+    }
   }
 
   init() {

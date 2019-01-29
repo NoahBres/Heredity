@@ -32,7 +32,11 @@ export default class DnaViz implements VizClass {
 
   private _styleId = "dna-viz-style-id";
 
-  constructor(parentElement: string | HTMLElement, heredity: Heredity) {
+  constructor(
+    parentElement: string | HTMLElement,
+    heredity: Heredity,
+    disableHooks: boolean = false
+  ) {
     if (typeof parentElement === "string" || parentElement instanceof String) {
       this._parentElement = <HTMLElement>(
         document.getElementById(<string>parentElement)
@@ -46,8 +50,10 @@ export default class DnaViz implements VizClass {
 
     this._heredity = heredity;
 
-    heredity.addHook("genPopPost", this.init, this);
-    heredity.addHook("nextGenPost", this.update, this);
+    if (!disableHooks) {
+      heredity.addHook("genPopPost", this.init, this);
+      heredity.addHook("nextGenPost", this.update, this);
+    }
   }
 
   init() {
