@@ -201,7 +201,7 @@ export default class ChartViz implements VizClass {
   private _styleId = "chart-viz-style-id";
 
   /**
-   * You can call ChartViz with either a string or HTMLElement as the first parameter.
+   * ChartViz can be initialized with either a string or HTMLElement as the first parameter.
    * Setting the parentElement parameter to a string will simply do a document.getElementById("") search
    *
    * @example
@@ -217,6 +217,10 @@ export default class ChartViz implements VizClass {
    *
    * // Or set by manual html element
    * const chart = new ChartViz(document.getElementById('chart-viz-element'), heredity);
+   *
+   * // Disable hooks to control updates yourself
+   * const chart = new ChartViz('chart-viz-element', heredity, false);
+   * heredity.generatePopulation(); // chart.update() won't automatically be called
    * ```
    *
    * @param parentElement HTML element that the visualization will insert itself in. Should be a blank div.
@@ -253,6 +257,7 @@ export default class ChartViz implements VizClass {
     }
   }
 
+  /** Initialize ChartViz. Sets bounds. Caclulates location. Sets lines. Adds legend. */
   init() {
     if (this._parentElement.dataset.initialized) {
       this.update();
@@ -342,6 +347,7 @@ export default class ChartViz implements VizClass {
     this._parentElement.dataset.initialized = "true";
   }
 
+  /** Update ChartViz. Updates the svg lines and ticks */
   update() {
     if (!this._noDataTextRemoved) {
       this._noDataText!.animate(200)
@@ -463,6 +469,13 @@ export default class ChartViz implements VizClass {
     });
   }
 
+  /** Setting ticks was too complicated and hacky so moved to it's own function
+   *
+   * @param ticks Array of ticks to update
+   * @param yMin y minimum to set
+   * @param yMax y max to set
+   * @param interval Interval of the ticks
+   */
   handleTicks(
     ticks: YAxisTick[],
     yMin: number,
@@ -502,6 +515,23 @@ export default class ChartViz implements VizClass {
       });
   }
 
+  /**
+   * Round up helper function. Rounds up the number based on toRound
+   *
+   * @param n Number to round up
+   * @param toRound Number to round by
+   *
+   * @example
+   * ```
+   * // Round up 8 to the nearest 5's place
+   * chartViz.roundUp(8, 5)
+   * // 10
+   *
+   * // Round up 14 to the nearest ten's place
+   * chartViz.roundDown(14, 10)
+   * // 20
+   * ```
+   */
   roundUp(n: number, toRound: number): number {
     let num = toRound * Math.round(n / toRound);
 
@@ -510,6 +540,23 @@ export default class ChartViz implements VizClass {
     return num;
   }
 
+  /**
+   * Round down helper function. Rounds up the number based on toRound
+   *
+   * @param n Number to round down
+   * @param toRound Number to round by
+   *
+   * @example
+   * ```
+   * // Round down 8 to the nearest 5's place
+   * chartViz.roundUp(8, 5)
+   * // 5
+   *
+   * // Round down 14 to the nearest ten's place
+   * chartViz.roundDown(14, 10)
+   * // 10
+   * ```
+   */
   roundDown(n: number, toRound: number): number {
     let num = this.roundUp(n, toRound);
     if (num > n) num -= toRound;
@@ -517,6 +564,7 @@ export default class ChartViz implements VizClass {
     return num;
   }
 
+  /** Handles resizing of the graph */
   resize() {
     this._bounds = {
       top: this._margin.top,
@@ -584,25 +632,53 @@ export default class ChartViz implements VizClass {
     });
   }
 
+  /**
+   * Allows visualization to link and pass data to each other.
+   * ChartViz doesn't have any linking functionality at the moment.
+   *
+   * @param toLink Visualization to link together
+   */
   link(toLink: VizClass): boolean {
     return false;
   }
 }
 
+/**
+ * Axis tick abstract class. Boilerplate for XAxisTick and YAxis tick.
+ * Draws the ticks on the x and y axes.
+ */
 abstract class AxisTick {
+  /** X coordinate of the tick */
   protected _x: number;
+  /** Y coordinate of the tick */
   protected _y: number;
+  /** Height of the tick */
   protected _height: number;
+  /** Width of the tick */
   protected _width: number;
+  /** Margin of the tick */
   protected _margin = 3;
+  /** Text drawn next to the tick */
   protected _value: string;
 
+  /** Object to draw on */
   protected _draw: SVG.Doc;
+  /** Tick line */
   protected _line?: SVG.Rect;
+  /** Text element */
   protected _text?: SVG.Text;
 
+  /** Group containing line and text */
   protected _group?: SVG.G;
 
+  /**
+   * @param x Set the x coordinate
+   * @param y Set the y coordinate
+   * @param width Set the width
+   * @param height Set the height
+   * @param value Set the text value
+   * @param draw Where to draw the tick
+   */
   constructor(
     x: number,
     y: number,
@@ -622,14 +698,18 @@ abstract class AxisTick {
     this.init();
   }
 
+  /** Remove elements */
   remove() {
     this._group!.remove();
   }
 
+  /** Initialize tick element */
   abstract init(): void;
 }
 
+/** Draws the ticks on the X Axis */
 class XAxisTick extends AxisTick {
+  /** Initalized the tick */
   init() {
     this._group = this._draw.group().move(this._x, this._y);
 
@@ -648,6 +728,12 @@ class XAxisTick extends AxisTick {
     this._group.add(this._text);
   }
 
+  /**
+   * Set the x coordinate of the tick. Choose whether to animate or not.
+   *
+   * @param x New x coordinate to move to
+   * @param animate Choose to animate the x change
+   */
   setX(x: number, animate = true) {
     this._x = x + this._width;
     this._group!.stop(true, true);
@@ -659,7 +745,9 @@ class XAxisTick extends AxisTick {
   }
 }
 
+/** Draws the tick on the Y Axis */
 class YAxisTick extends AxisTick {
+  /** Initialize the tick */
   init() {
     this._group = this._draw.group().move(this._x, this._y);
 
@@ -677,6 +765,12 @@ class YAxisTick extends AxisTick {
     this._group.add(this._text);
   }
 
+  /**
+   * Set the y coordinate of the tick. Choose whether to animate or not.
+   *
+   * @param y New y coordinate to move to
+   * @param animate Choose to animate the y change
+   */
   setY(y: number, animate = true) {
     this._y = y;
     this._group!.stop(true, true);
@@ -687,6 +781,9 @@ class YAxisTick extends AxisTick {
     }
   }
 
+  /**
+   * Remove the tick. Animate it off the graph
+   */
   remove() {
     this._y = this._group!.doc().node.clientHeight;
     this._group!.animate(300, ">")
@@ -699,12 +796,14 @@ class YAxisTick extends AxisTick {
   }
 }
 
+/** Interface for ChartDataType */
 interface ChartDataType {
   [key: string]: ChartDataFitnessType;
   topFitness: ChartDataFitnessType;
   fitness: ChartDataFitnessType;
 }
 
+/** Interface for ChartDataFitnessType */
 interface ChartDataFitnessType {
   name: string;
   values: number[];

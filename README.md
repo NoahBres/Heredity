@@ -36,7 +36,7 @@
 - [x] mutation.ts
 - [x] Population.ts
 - [x] seleciton.ts
-- [ ] viz/ChartViz.ts
+- [x] viz/ChartViz.ts
 - [ ] viz/DnaViz.ts
 - [ ] viz/PerceptronViz.ts
 - [ ] viz/TopGenesViz.ts
