@@ -475,14 +475,14 @@ export default class PerceptronViz implements VizClass {
 
   link(toLink: VizClass): boolean {
     if (toLink instanceof DnaViz) {
-      toLink.onPillHover(this, (chrom: GenericChromosome<any>) => {
+      toLink.onPillHover((chrom: GenericChromosome<any>) => {
         this._options.chromosome = <NeuralChromosome>chrom;
         // this._options.index = undefined;
         this.init();
         this._chromosome!.onCompute(this._chromosome, () => {
           this.updateSVG();
         });
-      });
+      }, this);
 
       return true;
     }

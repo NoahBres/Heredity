@@ -132,7 +132,7 @@ describe("DNA Viz", () => {
 
     const hook = jest.fn();
 
-    viz.onPillHover(null, hook);
+    viz.onPillHover(hook);
 
     let pickPill = document.querySelector(".viz__base-dna-pill");
     pickPill!.dispatchEvent(event);
@@ -161,7 +161,7 @@ describe("DNA Viz", () => {
 
     const hook = jest.fn();
 
-    viz.onPillHoverLeave(null, hook);
+    viz.onPillHoverLeave(hook);
 
     let pickPill = document.querySelector(".viz__base-dna-pill");
     pickPill!.dispatchEvent(event);
