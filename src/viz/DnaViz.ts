@@ -54,9 +54,9 @@ import PerceptronViz from "./PerceptronViz";
  *
  *
  * #### Note:
- * VizClass visualizations is designed to be set and forget. Meaning you simply initialize the
+ * VizClass visualizations are designed to be set and forget. Meaning you simply initialize the
  * object and it will handle updating by itself automatically. It does this by utilizing the
- * addHook() function of Heredity. If you would like to control updating yourself, disable hooks through the disableHook parameter
+ * addHook() function of Heredity. If you would like to control updating yourself, disable hooks through the disableHook parameter.
  *
  */
 export default class DnaViz implements VizClass {
@@ -234,7 +234,7 @@ export default class DnaViz implements VizClass {
    * dnaViz.onPillHover(() => {
    *       console.log("This is called on hover");
    *    },
-   *    this
+   *    this // <-- setting this is optional but may fix some errors
    * );
    * ```
    */
@@ -257,7 +257,7 @@ export default class DnaViz implements VizClass {
    * dnaViz.onPillHoverLeave(() => {
    *       console.log("This is called on hover leave");
    *    },
-   *    this
+   *    this // <-- setting this is optional but may fix some errors
    * );
    * ```
    */

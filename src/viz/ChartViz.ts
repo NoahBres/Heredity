@@ -57,9 +57,9 @@ import * as SVG from "svg.js";
  *
  *
  * #### Note:
- * VizClass visualizations is designed to be set and forget. Meaning you simply initialize the
+ * VizClass visualizations are designed to be set and forget. Meaning you simply initialize the
  * object and it will handle updating by itself automatically. It does this by utilizing the
- * addHook() function of Heredity. If you would like to control updating yourself, disable hooks through the disableHook parameter
+ * addHook() function of Heredity. If you would like to control updating yourself, disable hooks through the disableHook parameter.
  *
  */
 export default class ChartViz implements VizClass {
