@@ -633,7 +633,7 @@ export default class ChartViz implements VizClass {
   }
 
   /**
-   * Allows visualization to link and pass data to each other.
+   * Allows visualizations to link and pass data to each other.
    * ChartViz doesn't have any linking functionality at the moment.
    *
    * @param toLink Visualization to link together

@@ -269,7 +269,7 @@ export default class DnaViz implements VizClass {
   }
 
   /**
-   * Allows visualization to link and pass data to each other.
+   * Allows visualizations to link and pass data to each other.
    * DnaViz can link to PerceptronViz
    * Linking these two will allow PerceptronViz to show the perceptron of the hovered DNA Pill
    *
