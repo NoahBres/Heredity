@@ -227,6 +227,16 @@ export default class DnaViz implements VizClass {
    *
    * @param thisVal
    * @param listener
+   *
+   * @example
+   * ```typescript
+   *
+   * dnaViz.onPillHover(() => {
+   *       console.log("This is called on hover");
+   *    },
+   *    this
+   * );
+   * ```
    */
   onPillHover(
     listener: (chromosome: GenericChromosome<any>) => void,
@@ -235,6 +245,22 @@ export default class DnaViz implements VizClass {
     this._onPillHoverListeners.push({ thisVal, listener });
   }
 
+  /**
+   * Adds a listener that is called on a DnaPill hover leave event
+   *
+   * @param thisVal
+   * @param listener
+   *
+   * @example
+   * ```typescript
+   *
+   * dnaViz.onPillHoverLeave(() => {
+   *       console.log("This is called on hover leave");
+   *    },
+   *    this
+   * );
+   * ```
+   */
   onPillHoverLeave(
     listener: (chromosome: GenericChromosome<any>) => void,
     thisVal?: any
@@ -242,6 +268,13 @@ export default class DnaViz implements VizClass {
     this._onPillHoverLeaveListeners.push({ thisVal, listener });
   }
 
+  /**
+   * Allows visualization to link and pass data to each other.
+   * DnaViz can link to PerceptronViz
+   * Linking these two will allow PerceptronViz to show the perceptron of the hovered DNA Pill
+   *
+   * @param toLink Visualization to link together
+   */
   link(toLink: VizClass): boolean {
     if (toLink instanceof PerceptronViz) {
       return toLink.link(this);
@@ -250,6 +283,7 @@ export default class DnaViz implements VizClass {
   }
 }
 
+/** Type checking for the pill listener parameters */
 interface PillListenerObject {
   thisVal: any;
   listener: (chromosome: GenericChromosome<any>) => void;
