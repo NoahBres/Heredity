@@ -16,6 +16,7 @@
 
 ## Todo v1.5
 
+- NeuralChromosome automatically set gene length based on the perceptron passed through
 - Resize listener on SVG visualizations
 - Replace all viz css classes with the cssPrefix
 - Fix perceptron viz death switch to another gene issue
@@ -37,8 +38,8 @@
 - [x] Population.ts
 - [x] seleciton.ts
 - [x] viz/ChartViz.ts
-- [ ] viz/DnaViz.ts
-- [ ] viz/PerceptronViz.ts
+- [x] viz/DnaViz.ts
+- [x] viz/PerceptronViz.ts
 - [ ] viz/TopGenesViz.ts
 - [ ] viz/VizClassViz.ts
 - [ ] chromosomes/BitChromosomes.ts

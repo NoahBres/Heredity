@@ -275,7 +275,7 @@ export default class ChartViz implements VizClass {
     this._graphHeight = this._bounds.bottom - this._bounds.top;
 
     this._canvas = SVG(this._canvasId);
-
+    
     Object.values(this._chartData).forEach(obj => {
       this._plotLines.push(
         this._canvas!.polyline([

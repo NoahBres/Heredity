@@ -50,7 +50,8 @@ import * as SVG from "svg.js";
  *
  * const perceptronViz = new PerceptronViz(
  *   document.getElementById("perceptron-viz-element"),
- *   heredity
+ *   heredity,
+ *   { index: 0 }
  * );
  *
  * // PerceptronViz will now automatically update by itself.
@@ -68,44 +69,72 @@ import * as SVG from "svg.js";
  *
  */
 export default class PerceptronViz implements VizClass {
+  /** Parent Heredity object */
   _heredity: Heredity;
+  /** Parent HTML element */
   _parentElement: HTMLElement;
 
+  /** NeuralChromosome to visualize */
   private _chromosome?: NeuralChromosome;
+  /** Last set NeuralChromosome to test for diffs and optimize updates */
   private _lastChromosome?: NeuralChromosome;
+  /** Options set by the user */
   private _options: {
+    /** Index of the chromosome in Heredity's chromosome list */
     index?: number;
+    /** Chromosome to pass in */
     chromosome?: NeuralChromosome;
+    /** Threshold function to visualize the last layer neurons firing */
     threshhold?: (i: number) => boolean;
   } = {};
 
+  /** Radius of the neural net nodes */
   private _nodeRadius = 50;
+  /** Minimum margin between the nodes */
   private _nodeMargin = 0;
+  /** Padding of the neural net */
   private _padding = 20;
 
+  /** Built graph of the neural net */
   private _graph: GraphInterface = {
+    /** Contains the nodes and values of the neural net */
     nodes: [],
+    /** Contains the links between nodes */
     links: []
   };
 
+  /**
+   * HTML element indicating that the chromosome is present. Will appear if
+   * a'`dead` tag is assigned to the chromomsome
+   */
   private _deadIndicatorElement: HTMLElement;
 
+  /** Dna Pill visualizing the chromosome */
   private _dnaPill?: DnaPill;
+  /** Stlye classname of the DnaPill */
   private readonly _dnaPillClassName = `${cssPrefix}perceptron-viz-dna-pill`;
 
+  /** Style classname of the container div */
   private readonly _containerClassName = "perceptron-container";
 
+  /** Canvas to be drawn on */
   private _canvas?: SVG.Doc;
+  /** Id of the canvas */
   private readonly _canvasId = `${cssPrefix}perceptron-viz-canvas`;
 
+  /** Node objects to be drawn */
   private _drawingNodes: NeuralNode[] = [];
+  /** Link objects to be drawn */
   private _drawingLinks: NeuralNodeLink[] = [];
 
+  /** Option to disable hooks and control updating manually */
   private _disableHooks: boolean = false;
 
+  /** SVG data for dead indicator */
   private _skullSvg =
     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Your_Icon" x="0px" y="0px" width="100px" height="100px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve"><path d="M89.12,85.757c-4.392-1.602-4.796,2.233-12.704-0.645l-15.48-5.634l15.479-5.635c7.911-2.875,8.31,0.957,12.706-0.643  c1.754-0.639,2.875-3.036,2.234-4.796c-0.639-1.757-1.079-1.595-1.716-3.354c-0.642-1.76-0.201-1.918-0.843-3.675  c-0.639-1.761-3.037-2.876-4.794-2.233c-4.394,1.596-2.238,4.793-10.146,7.672L50,75.498l-23.858-8.684  c-7.909-2.878-5.75-6.076-10.145-7.674c-1.756-0.639-4.153,0.478-4.793,2.237c-0.643,1.755-0.202,1.916-0.84,3.674  c-0.64,1.756-1.081,1.6-1.723,3.355c-0.638,1.76,0.481,4.155,2.238,4.796c4.396,1.599,4.794-2.236,12.704,0.642l15.48,5.634  l-15.48,5.635c-7.909,2.879-8.311-0.959-12.704,0.643c-1.756,0.639-2.875,3.035-2.234,4.795c0.636,1.758,1.076,1.598,1.719,3.354  c0.639,1.757,0.2,1.92,0.836,3.679c0.643,1.758,3.039,2.874,4.798,2.235c4.396-1.602,2.235-4.795,10.144-7.675L50,83.459  l23.857,8.683c7.909,2.883,5.751,6.075,10.146,7.676c1.755,0.638,4.154-0.479,4.795-2.238c0.64-1.756,0.198-1.916,0.842-3.673  c0.639-1.76,1.079-1.599,1.717-3.356C91.999,88.791,90.879,86.394,89.12,85.757z"/><path d="M50,0C36.745,0,26,10.745,26,24v21c0,2.2,1.323,5.221,2.939,6.713l7.121,6.574c1.617,1.492,3.39,4.288,3.939,6.213  s2.8,3.5,5,3.5h10c2.2,0,4.45-1.575,5-3.5s2.322-4.721,3.939-6.213l7.121-6.574C72.678,50.221,74,47.2,74,45V24  C74,10.745,63.255,0,50,0z M38.461,49C34.596,49,32,45.768,32,42.455C32,39.141,35.134,37,39,37s7,2.141,7,5.455  C46,45.768,42.328,49,38.461,49z M50,58c-2,0-3-1-3-3s2-6,3-6s3,4,3,6S52,58,50,58z M61.538,49C57.673,49,54,45.768,54,42.455  C54,39.141,57.134,37,61,37s7,2.141,7,5.455C68,45.768,65.404,49,61.538,49z"/></svg>';
 
+  /** Styling for the PerceptronViz component */
   private _style = `
     .${cssPrefix}${this._containerClassName} {
       background: white;
@@ -184,8 +213,70 @@ export default class PerceptronViz implements VizClass {
     }
   `;
 
+  /** ID given to the style element */
   private _styleId = "perceptron-viz-style-id";
 
+  /**
+   * ChartViz can be initialized with either a string or HTMLElement as the first parameter.
+   * Setting the parentElement parameter to a string will simply do a document.getElementById("") search
+   *
+   * @example
+   * ```typescript
+   * const heredity = new Heredity({
+   *   populationSize: 50
+   *   templateChromosome: new NeuralChromosome(
+   *   {
+   *     inputLength: 2,
+   *     hiddenLength: [2],
+   *     outputLength: 1
+   *   },
+   *   6)
+   * });
+   *
+   * // Set by string id
+   * const perceptronViz = new PerceptronViz(
+   *    'perceptron-viz-element',
+   *    heredity,
+   *    { index: 0 }
+   * );
+   *
+   * // Or set by manual html element
+   * const perceptronViz = new PerceptronViz(
+   *    document.getElementById('perceptron-viz-element'),
+   *    heredity,
+   *    { index: 0 }
+   * );
+   *
+   * // Disable hooks to control updates yourself
+   * const perceptronViz = new PerceptronViz('perceptron-viz-element', heredity, { index: 0 }, false);
+   * // Manually update everything using the following:
+   * chart.init()
+   * chart.update()
+   * chart.updateSVG()
+   *
+   * // You are required to pass in a NeuralChromosome somehow
+   * // Setting index will set the index where PerceptronViz will take the chromosome from Heredity's chromosome list
+   *
+   * // e.g. `index: 0` will take the first chromosome in the list
+   * const perceptronViz = new PerceptronViz(
+   *    'perceptron-viz-element',
+   *    heredity,
+   *    { index: 0 }
+   * );
+   *
+   * // Or you can just manually pass in a chromosome to visualize
+   * const perceptronViz = new PerceptronViz(
+   *    'perceptron-viz-element',
+   *    heredity,
+   *    { chromosome: new NeuralChromosome(...blablabla) }
+   * );
+   * ```
+   *
+   * @param parentElement HTML element that the visualization will insert itself in. Should be a blank div.
+   * @param heredity Heredity object where ChartViz will pull it's data from
+   * @param options Options to pass through. Setting either index or chromosome is required
+   * @param disableHooks Choose to disable hooking into Heredity for manual control of the init and update functions
+   */
   constructor(
     parentElement: string | HTMLElement,
     heredity: Heredity,
@@ -233,6 +324,10 @@ export default class PerceptronViz implements VizClass {
     }
   }
 
+  /**
+   * Initialize PerceptronViz. Adds tag listeners,
+   * builds the neural net graph, and creates the SVG elements.
+   */
   init() {
     // Main initialize
     if (this._parentElement.dataset.initialized) {
@@ -329,6 +424,10 @@ export default class PerceptronViz implements VizClass {
     this._parentElement.dataset.initialized = "true";
   }
 
+  /**
+   * Updates the SVG. Updates the listeners if needed.
+   * Updates the dead indicator element.
+   */
   update() {
     if (this._options.chromosome !== undefined) {
       this._chromosome = this._options.chromosome;
@@ -363,6 +462,7 @@ export default class PerceptronViz implements VizClass {
     this.updateSVG();
   }
 
+  /** Rebuilds the graph. Updates the SVG */
   updateSVG() {
     this._graph = this.buildGraph(
       this._chromosome!,
@@ -396,6 +496,13 @@ export default class PerceptronViz implements VizClass {
     });
   }
 
+  /**
+   * Builds the graph of the neural net data. Generates data for
+   * nodes andlinks using the NeuralChromosome.
+   *
+   * @param chrom NeuralChromosome to pass and build graph of
+   * @param graphCoords Coordinates of the graph elements
+   */
   buildGraph(chrom: NeuralChromosome, graphCoords: number[][]): GraphInterface {
     const graph: GraphInterface = {
       nodes: [],
@@ -479,6 +586,11 @@ export default class PerceptronViz implements VizClass {
     return graph;
   }
 
+  /**
+   * Generates coordinates for all the graph elements
+   *
+   * @param chrom NeuralChromosome
+   */
   genGraphCoords(chrom: NeuralChromosome): number[][] {
     const coords: number[][] = [];
 
@@ -512,6 +624,7 @@ export default class PerceptronViz implements VizClass {
     return coords;
   }
 
+  /** Handles resizing of viz */
   resize() {
     let graphCoords: number[][] = [];
 
@@ -538,6 +651,13 @@ export default class PerceptronViz implements VizClass {
     });
   }
 
+  /**
+   * Allows visualizations to link and pass data to each other.
+   * PerceptronViz can link to DnaViz
+   * Linking these two will allow PerceptronViz to dusplay the perceptron of the hovered Dna Pill
+   *
+   * @param toLink Visualization to link together
+   */
   link(toLink: VizClass): boolean {
     if (toLink instanceof DnaViz) {
       toLink.onPillHover((chrom: GenericChromosome<any>) => {
