@@ -1,8 +1,12 @@
 import Heredity from "../Heredity";
-import { default as VizClass, injectStylesheet, DnaPill } from "./VizClass";
+import {
+  default as VizClass,
+  cssPrefix,
+  injectStylesheet,
+  DnaPill
+} from "./VizClass";
 import GenericChromosome from "../chromosomes/GenericChromosome";
 
-// TODO Move DNAPill to separate class
 // TODO Add animation to spawn
 // TODO Replace stuff with VizClass name
 
@@ -14,10 +18,12 @@ export default class TopGeneViz implements VizClass {
 
   private _emptyTextElement: HTMLParagraphElement;
 
-  private readonly _dnaPillClassName = "viz__top-genes-viz-dna-pill";
+  private readonly _dnaPillClassName = `${cssPrefix}top-genes-viz-dna-pill`;
+
+  private readonly _containerClassName = `top-genes-container`;
 
   private _style = `
-    .viz__top-genes-container {
+    .${cssPrefix}${this._containerClassName} {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
@@ -34,7 +40,7 @@ export default class TopGeneViz implements VizClass {
       overflow-y: auto;
     }
 
-    .viz__top-genes-pill-container {
+    .${this._dnaPillClassName}-container {
       margin: 0.3em;
 
       display: flex;
@@ -42,16 +48,17 @@ export default class TopGeneViz implements VizClass {
       align-items: center;
     }
 
-    .viz__top-genes-hidden-text {
+    .${cssPrefix}${this._containerClassName} .hidden-text {
       width: 100%;
       text-align: center;
     }
 
-    .viz__top-genes-hidden-text.hidden {
+    .${cssPrefix}${this._containerClassName} .hidden-text.hidden {
       display: none;
     }
 
-    .viz__top-genes-pill-container-generation-text, .viz__top-genes-pill-container-fitness-text {
+    .${cssPrefix}${this._containerClassName} .generation-text,
+    .${cssPrefix}${this._containerClassName} .fitness-text {
       margin: 0;
       font-size: 0.9em;
     }
@@ -77,14 +84,16 @@ export default class TopGeneViz implements VizClass {
       this._parentElement = <HTMLElement>parentElement;
     }
 
-    this._parentElement.classList.add("viz__top-genes-container");
+    this._parentElement.classList.add(
+      `${cssPrefix}${this._containerClassName}`
+    );
     injectStylesheet(this._style, this._styleId);
 
     this._heredity = heredity;
 
     this._emptyTextElement = document.createElement("p");
     this._emptyTextElement.innerText = "No past populations";
-    this._emptyTextElement.classList.add("viz__top-genes-hidden-text");
+    this._emptyTextElement.classList.add("hidden-text");
     this._parentElement.appendChild(this._emptyTextElement);
 
     if (!disableHooks) {
@@ -111,23 +120,21 @@ export default class TopGeneViz implements VizClass {
     });
 
     const pillContainer = document.createElement("div");
-    pillContainer.classList.add("viz__top-genes-pill-container");
+    pillContainer.classList.add(`${this._dnaPillClassName}-container`);
 
     const dp = new DnaPill(topChromosome.chromosome, this._dnaPillClassName);
     pillContainer.appendChild(dp.element);
 
     const generationText = document.createElement("p");
     generationText.innerText = `Gen: ${this._heredity.history.length - 1}`;
-    generationText.classList.add(
-      "viz__top-genes-pill-container-generation-text"
-    );
+    generationText.classList.add("generation-text");
     pillContainer.appendChild(generationText);
 
     const fitnessText = document.createElement("p");
     fitnessText.innerText = `Fitness: ${Math.floor(
       topChromosome.fitness
     ).toString()}`;
-    fitnessText.classList.add("viz__top-genes-pill-container-fitness-text");
+    fitnessText.classList.add("fitness-text");
     pillContainer.appendChild(fitnessText);
 
     this._parentElement.insertBefore(
