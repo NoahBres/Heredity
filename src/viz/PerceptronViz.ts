@@ -38,7 +38,7 @@ import * as SVG from "svg.js";
  * import { PerceptronViz } from "heredity";
  *
  * const heredity = new Heredity({
- *   populationSize: 50
+ *   populationSize: 50,
  *   templateChromosome: new NeuralChromosome(
  *   {
  *     inputLength: 2,
@@ -223,7 +223,7 @@ export default class PerceptronViz implements VizClass {
    * @example
    * ```typescript
    * const heredity = new Heredity({
-   *   populationSize: 50
+   *   populationSize: 50,
    *   templateChromosome: new NeuralChromosome(
    *   {
    *     inputLength: 2,

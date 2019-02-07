@@ -37,7 +37,7 @@ import * as SVG from "svg.js";
  * import { ChartViz } from "heredity";
  *
  * const heredity = new Heredity({
- *    populationSize: 50
+ *    populationSize: 50,
  *    templateChromosome: new NumberChromosome({}, 5)
  * });
  *
@@ -208,7 +208,7 @@ export default class ChartViz implements VizClass {
    * ```typescript
    *
    * const heredity = new Heredity({
-   *    populationSize: 50
+   *    populationSize: 50,
    *    templateChromosome: new NumberChromosome({}, 5)
    * });
    *
@@ -275,7 +275,7 @@ export default class ChartViz implements VizClass {
     this._graphHeight = this._bounds.bottom - this._bounds.top;
 
     this._canvas = SVG(this._canvasId);
-    
+
     Object.values(this._chartData).forEach(obj => {
       this._plotLines.push(
         this._canvas!.polyline([

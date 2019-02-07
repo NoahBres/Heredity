@@ -34,7 +34,7 @@ import PerceptronViz from "./PerceptronViz";
  * import { ChartViz } from "heredity";
  *
  * const heredity = new Heredity({
- *    populationSize: 50
+ *    populationSize: 50,
  *    templateChromosome: new NumberChromosome({}, 5)
  * });
  *
@@ -100,7 +100,7 @@ export default class DnaViz implements VizClass {
    * ```typescript
    *
    * const heredity = new Heredity({
-   *    populationSize: 50
+   *    populationSize: 50,
    *    templateChromosome: new NumberChromosome({}, 5)
    * });
    *
