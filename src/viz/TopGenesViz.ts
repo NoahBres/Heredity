@@ -8,20 +8,77 @@ import {
 import GenericChromosome from "../chromosomes/GenericChromosome";
 
 // TODO Add animation to spawn
-// TODO Replace stuff with VizClass name
 
-export default class TopGeneViz implements VizClass {
+/**
+ * ## TopGenesViz
+ * Visualizes a list of the highest scoring gene per generation
+ *
+ * #### Basic usage
+ * @example
+ * ```html
+ *
+ * <html>
+ *    <body>
+ *       <!-- Your html content -->
+ *
+ *        <div id="top-genes-viz-element">
+ *            <!-- This div should be empty -->
+ *        </div>
+ *
+ *        <script src="main.js"></script>
+ *    </body>
+ * </html>
+ * ```
+ *
+ * @example
+ * ```typescript
+ *
+ * import { Heredity } from "heredity";
+ * import { TopGenesViz } from "heredity";
+ *
+ * const heredity = new Heredity({
+ *    populationSize: 50,
+ *    templateChromosome: new NumberChromosome({}, 5)
+ * });
+ *
+ * const topGeneViz = new TopGeneViz(
+ *    document.getElementById("top-gene-viz"),
+ *    heredity
+ * );
+ *
+ * // TopGeneViz will now automatically update by itself.
+ * // No need to do anything else
+ *
+ * heredity.generatePopulation();
+ * // TopGeneViz will auto update
+ * heredity.nextGeneration();
+ * // TopGeneViz will auto update
+ * ```
+ *
+ * #### Note:
+ * VizClass visualizations are designed to be set and forget. Meaning you simply initialize the
+ * object and it will handle updating by itself automatically. It does this by utilizing the
+ * addHook() function of Heredity. If you would like to control updating yourself, disable hooks through the disableHook parameter.
+ */
+export default class TopGenesViz implements VizClass {
+  /** Parent of Heredity object  */
   _heredity: Heredity;
+  /** Parent HTML element */
   _parentElement: HTMLElement;
 
+  /** List of chromosomes to represent */
   private _chromosomeList: ChromosomeList[] = [];
 
+  /** Text element indicating an empty list */
   private _emptyTextElement: HTMLParagraphElement;
 
+  /** Style classname of the DnaPill */
   private readonly _dnaPillClassName = `${cssPrefix}top-genes-viz-dna-pill`;
 
+  /** Style classname of the container div */
   private readonly _containerClassName = `top-genes-container`;
 
+  /** Styling for the TopGenesViz component */
   private _style = `
     .${cssPrefix}${this._containerClassName} {
       display: flex;
@@ -69,8 +126,35 @@ export default class TopGeneViz implements VizClass {
     }
   `;
 
+  /** ID given to the style element */
   private _styleId = "top-genes-style-id";
 
+  /**
+   * TopGenesViz can be initialized with either a string or HTMLElement as the first parameter.
+   * Setting the parentElement parameter to a string will simply do a document.getElementById("") search
+   *
+   * @example
+   * ```typescript
+   * const heredity = new Heredity({
+   *    populationSize: 50,
+   *    templateChromosome: new NumberChromosome({}, 5)
+   * });
+   *
+   * // Set by string id
+   * const topGenesViz = new TopGenesViz('top-genes-viz-element', heredity);
+   *
+   * // Or set by manual html element
+   * const topGenesViz = new TopGenesViz(document.getElementById('top-genes-viz-element'), heredity);
+   *
+   * // Disable hooks to control updates yourself
+   * const topGenesViz = new TopGenesViz('top-genes-viz-element', heredity, false);
+   * heredity.generatePopulation(); // topGenesViz.update() won't automatically be called
+   * ```
+   *
+   * @param parentElement HTML element that the visualization will insert itself in. Should be a blank div.
+   * @param heredity Heredity object where ChartViz will pull it's data from
+   * @param disableHooks Choose to disable hooking into Heredity for manual control of the init and update functions
+   */
   constructor(
     parentElement: string | HTMLElement,
     heredity: Heredity,
@@ -102,8 +186,10 @@ export default class TopGeneViz implements VizClass {
     }
   }
 
+  /** Initialize TopGenesViz. Doesn't do anything */
   init() {}
 
+  /** Update TopGenesViz. Adds new pill upon update */
   update() {
     /* istanbul ignore next */
     if (!this._emptyTextElement.classList.contains("hidden")) {
@@ -143,11 +229,18 @@ export default class TopGeneViz implements VizClass {
     );
   }
 
+  /**
+   * Allows visualizations to link and pass data to each other.
+   * TopGenesViz doesn't link with anything else.
+   *
+   * @param toLink Visualization to link together
+   */
   link(toLink: VizClass) {
     return false;
   }
 }
 
+/** Type checking for the chromosomeList */
 interface ChromosomeList {
   chromosome: GenericChromosome<any>;
   fitness: number;
