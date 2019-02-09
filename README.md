@@ -40,7 +40,7 @@
 - [x] viz/ChartViz.ts
 - [x] viz/DnaViz.ts
 - [x] viz/PerceptronViz.ts
-- [ ] viz/TopGenesViz.ts
+- [x] viz/TopGenesViz.ts
 - [ ] viz/VizClassViz.ts
 - [ ] chromosomes/BitChromosomes.ts
 - [ ] chromosomes/GenericChromosome.ts

@@ -1,6 +1,11 @@
 import Heredity from "../Heredity";
 import GenericChromosome from "../chromosomes/GenericChromosome";
-import { default as VizClass, injectStylesheet, DnaPill } from "./VizClass";
+import {
+  default as VizClass,
+  cssPrefix,
+  injectStylesheet,
+  DnaPill
+} from "./VizClass";
 import PerceptronViz from "./PerceptronViz";
 
 // TODO Optimize by minimizing DOM manipulation
@@ -65,6 +70,9 @@ export default class DnaViz implements VizClass {
   /** Parent HTML element */
   _parentElement: HTMLElement;
 
+  /** Class name to prepend to children elements. Used to manage styling. */
+  private readonly _containerClassName = "dna-viz-container";
+
   /** Map of DNA pills. Each DnaPill object is linked to its respective chromosome  */
   private _dnaPills: Map<GenericChromosome<any>, DnaPill> = new Map();
 
@@ -78,7 +86,7 @@ export default class DnaViz implements VizClass {
 
   /** Styling of the DnaViz component */
   private _style = `
-    .viz__dna-container {
+    .${cssPrefix}${this._containerClassName} {
       display: flex;
       flex-wrap: wrap;
       padding: 1em;
@@ -132,7 +140,9 @@ export default class DnaViz implements VizClass {
       this._parentElement = <HTMLElement>parentElement;
     }
 
-    this._parentElement.classList.add("viz__dna-container");
+    this._parentElement.classList.add(
+      `${cssPrefix}${this._containerClassName}`
+    );
     injectStylesheet(this._style, this._styleId);
 
     this._heredity = heredity;
