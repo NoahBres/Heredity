@@ -32,6 +32,7 @@
 
 ## Documentation todo
 
+- [ ] Add pure javascript documentation
 - [x] crossovers.ts
 - [x] Heredity.ts
 - [x] mutation.ts
