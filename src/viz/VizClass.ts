@@ -1,9 +1,28 @@
 import { default as Heredity } from "../Heredity";
 import GenericChromosome from "../chromosomes/GenericChromosome";
 
+/** Prefix for visualization css classes */
 const cssPrefix = "heredity-viz__";
 export { cssPrefix };
 
+/**
+ * ## VizClass
+ * Interface for implementing visualizations.
+ *
+ * Only used for Typescript projects
+ *
+ * @example
+ * ```typescript
+ * class DnaViz implements VizClass {
+ *    _heredity: Heredity;
+ *    _parentElement: HTMLElement;
+ *
+ *    init() {}
+ *    update() {}
+ *    link() {}
+ * }
+ * ```
+ */
 export default interface VizClass {
   readonly _heredity: Heredity;
   readonly _parentElement: HTMLElement;
@@ -13,7 +32,13 @@ export default interface VizClass {
   link(toLink: VizClass): boolean;
 }
 
-export function injectStylesheet(style: string, styleId: string) {
+/**
+ * Injects css styles into a page
+ *
+ * @param style Takes css styles as a string
+ * @param styleId
+ */
+export function injectStylesheet(style: string, styleId?: string) {
   const existingScript = document.getElementById(styleId);
 
   if (existingScript) {
@@ -22,7 +47,7 @@ export function injectStylesheet(style: string, styleId: string) {
 
   const node = document.createElement("style");
   node.innerHTML = style;
-  node.id = styleId;
+  if (styleId) node.id = styleId;
 
   document.head!.appendChild(node);
 }
