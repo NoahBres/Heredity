@@ -36,14 +36,10 @@ export default interface VizClass {
  * Injects css styles into a page
  *
  * @param style Takes css styles as a string
- * @param styleId
+ * @param styleId Pass in an id to append to the <style> element. Ensures that you don't inject the same stylesheet
  */
 export function injectStylesheet(style: string, styleId?: string) {
-  const existingScript = document.getElementById(styleId);
-
-  if (existingScript) {
-    return;
-  }
+  if (styleId && document.getElementById(styleId)) return;
 
   const node = document.createElement("style");
   node.innerHTML = style;
@@ -52,19 +48,52 @@ export function injectStylesheet(style: string, styleId?: string) {
   document.head!.appendChild(node);
 }
 
+/**
+ * ## DnaPill
+ * Component used to visualize chromosome
+ *
+ * @example
+ * ```typescript
+ * import { DnaPill } from 'heredity';
+ *
+ * const chrom = new NumberChromosome({}, 5).generate();
+ *
+ * const dp = new DnaPill(chrom);
+ *
+ * document.body.appendChild(dp.element);
+ *
+ * // Change chromosome
+ * dp.setChromosome(new NumberChromosome({}, 5).generate());
+ *
+ * // Update
+ * dp.update();
+ *
+ * // Set hover listener
+ * dp.onHover(() => { console.log("I'm called on hover"); });
+ * dp.onHoverLeave(() => { console.log("I'm called on hover leave"); });
+ * ```
+ */
 export class DnaPill {
+  /** Constructed HTML element */
   private _element: HTMLDivElement;
 
+  /** HTML Element representing each gene */
   private _geneReps: HTMLDivElement[];
 
+  /** Chromosome to represent */
   private _chromosome: GenericChromosome<any>;
 
+  /** List of hover listeners */
   private _onHoverListeners: PillListenerObject[] = [];
+  /** List of hover leave listeners */
   private _onHoverLeaveListeners: PillListenerObject[] = [];
 
+  /** CSS class to manage styles */
   private readonly _baseClassName = "viz__base-dna-pill";
+  /** Alternative class name. Allows user to set additional CSS class for custom styling. */
   private _alternativeClassName = "";
 
+  /** Styling for the DnaPill component */
   private _style = `
     .${this._baseClassName} {
       display: inline-block;
@@ -143,10 +172,19 @@ export class DnaPill {
     }
     `;
 
+  /** ID given to the element */
   private _styleId = "dna-pill-style-id";
 
+  /** Dirty tag. Indicates whether or not to update dom when update() is called for optimization purposes. */
   private _dirty = false;
 
+  /**
+   * DnaPill is initialized with a chromosome. Chromosome must implement getColorsHue() to work correctly.
+   * DnaPill can be initialized with an optional class that you can use to style on your own.
+   *
+   * @param chromosome Chromosome to represent
+   * @param className Class name appended to the container element
+   */
   constructor(chromosome: GenericChromosome<any>, className?: string) {
     this._chromosome = chromosome;
 
@@ -190,6 +228,7 @@ export class DnaPill {
     injectStylesheet(this._style, this._styleId);
   }
 
+  /** Update DnaPill. Checks for tags. If dirty, clears children and insert new updated values */
   update() {
     if (this._chromosome.tags.has("dead")) {
       this._element.classList.add("dead");
@@ -220,39 +259,63 @@ export class DnaPill {
     }
   }
 
+  /**
+   * Set a new chromosome to represent
+   * @param chromosome Chromosome to represent
+   */
   setChromosome(chromosome: GenericChromosome<any>) {
     this._chromosome = chromosome;
     this._dirty = true;
   }
 
+  /**
+   * Adds a listener that is called on a DnaPill hover event
+   *
+   * @param listener Function that will be called on hover
+   * @param thisVal `this` value that will be bound on function call
+   */
   onHover(
-    thisVal: any,
-    listener: (chromosome: GenericChromosome<any>) => void
+    listener: (chromosome: GenericChromosome<any>) => void,
+    thisVal?: any
   ) {
     this._onHoverListeners.push({ thisVal, listener });
   }
 
+  /**
+   * Adds a listener that is called on DnaPill hover leave event
+   *
+   * @param listener Function that will be called on hover leave
+   * @param thisVal `this` value that will be bound on function call
+   */
   onHoverLeave(
-    thisVal: any,
-    listener: (chromosome: GenericChromosome<any>) => void
+    listener: (chromosome: GenericChromosome<any>) => void,
+    thisVal?: any
   ) {
     this._onHoverLeaveListeners.push({ thisVal, listener });
   }
 
+  /**
+   * Set alternative class name. This allows you to set an additional css class name for custom styling.
+   */
   set alternativeClassName(className: string) {
     this._alternativeClassName = className;
     this._dirty = true;
   }
 
+  /**
+   * Returns the default css class name appended to the pill. Can be used for custom styling.
+   */
   get baseClassName(): string {
     return this._baseClassName;
   }
 
+  /** Returns the HTML Element containing the pill. */
   get element(): HTMLDivElement {
     return this._element;
   }
 }
 
+/** Type checking for the pill lisstener parameters */
 interface PillListenerObject {
   thisVal: any;
   listener: (chromosome: GenericChromosome<any>) => void;
