@@ -172,6 +172,7 @@ export default class DnaViz implements VizClass {
     this._heredity.chromosomes.forEach(e => {
       const dp = new DnaPill(e);
       dp.onHover(this, chromosome => {
+      dp.onHover(chromosome => {
         this._onPillHoverListeners.forEach(l => {
           l.listener.apply(l.thisVal, [chromosome]);
         });
