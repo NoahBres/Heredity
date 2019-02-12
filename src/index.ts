@@ -26,3 +26,5 @@ export { default as DnaViz } from "./viz/DnaViz";
 export { default as PerceptronViz } from "./viz/PerceptronViz";
 export { default as TopGenesViz } from "./viz/TopGenesViz";
 export { default as ChartViz } from "./viz/ChartViz";
+
+export { default as VizClass, DnaPill, injectStylesheet } from "./viz/VizClass";
