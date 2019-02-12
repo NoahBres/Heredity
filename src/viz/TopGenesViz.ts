@@ -135,6 +135,7 @@ export default class TopGenesViz implements VizClass {
    *
    * @example
    * ```typescript
+   *
    * const heredity = new Heredity({
    *    populationSize: 50,
    *    templateChromosome: new NumberChromosome({}, 5)

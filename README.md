@@ -42,8 +42,8 @@
 - [x] viz/DnaViz.ts
 - [x] viz/PerceptronViz.ts
 - [x] viz/TopGenesViz.ts
-- [ ] viz/VizClassViz.ts
-- [ ] chromosomes/BitChromosomes.ts
+- [x] viz/VizClassViz.ts
+- [x] chromosomes/BitChromosomes.ts
 - [ ] chromosomes/GenericChromosome.ts
 - [ ] chromosomes/NeuralChromosome.ts
 - [ ] chromosomes/NumberChromosome.ts

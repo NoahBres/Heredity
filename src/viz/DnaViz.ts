@@ -35,6 +35,7 @@ import PerceptronViz from "./PerceptronViz";
  *
  * @example
  * ```typescript
+ *
  * import { Heredity } from "heredity";
  * import { ChartViz } from "heredity";
  *

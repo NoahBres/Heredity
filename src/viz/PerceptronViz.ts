@@ -222,6 +222,7 @@ export default class PerceptronViz implements VizClass {
    *
    * @example
    * ```typescript
+   *
    * const heredity = new Heredity({
    *   populationSize: 50,
    *   templateChromosome: new NeuralChromosome(

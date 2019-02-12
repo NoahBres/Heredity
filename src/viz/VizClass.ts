@@ -13,6 +13,7 @@ export { cssPrefix };
  *
  * @example
  * ```typescript
+ *
  * class DnaViz implements VizClass {
  *    _heredity: Heredity;
  *    _parentElement: HTMLElement;
@@ -54,6 +55,7 @@ export function injectStylesheet(style: string, styleId?: string) {
  *
  * @example
  * ```typescript
+ *
  * import { DnaPill } from 'heredity';
  *
  * const chrom = new NumberChromosome({}, 5).generate();
