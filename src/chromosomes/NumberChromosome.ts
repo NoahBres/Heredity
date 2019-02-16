@@ -37,19 +37,19 @@ export default class NumberChromosome extends GenericChromosome<number> {
    * // Initialize a chromosome with 3 genes and a fitness of 45
    * const n = new NumberChromosome(
    *    {
-   *      lowerBound: 0,
-   *      upperBound: 10,
-   *      round: false,
+   *      lowerBound: 0,   // Lower bound for number generation. Default is 0
+   *      upperBound: 10,  // Upper bound for number generation. Default is 1
+   *      round: false,    // Whether or not numbers should be generated as whole nummbers
    *    },
-   *    3,
-   *    [ 9.76315, 2.87543, 6.034597 ],
-   *    45
+   *    3,   // Length of the chromosome
+   *    [ 9.76315, 2.87543, 6.034597 ], // (optional) Manually set the gene values
+   *    45   // (optional) Fitness of the chromosome
    * )
    * ```
    * @param param0 Options for the number generation
    * @param length Length of chromosomes
    * @param genes Array of gene values
-   * @param score Fitness
+   * @param score Fitness of the chromosome
    */
   constructor(
     {
