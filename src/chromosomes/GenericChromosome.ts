@@ -28,6 +28,7 @@ export default class GenericChromosome<GeneType> {
   /** Length of chromosome. Primarily used for generation. */
   protected _length: number = 0;
 
+  /** Local TagManager */
   tags: TagManager = new TagManager(this);
 
   /**
@@ -67,41 +68,120 @@ export default class GenericChromosome<GeneType> {
     return this;
   }
 
+  /**
+   * Returns an array of hues representing each gene.
+   * Should be caclulated in the overriden class.
+   * GenericChromosome will return an empty array.
+   *
+   * @example
+   * ```typescript
+   *
+   * chromosome.getColorsHue()
+   * // []
+   * // Generic chromosome actually returns an empty array
+   * ```
+   */
   getColorsHue(): number[] {
     return [];
   }
 
+  /** Returns the fitness of the chromosome */
   get fitness(): number {
     return this._fitness;
   }
 
+  /** Set the fitness of the chromosome */
   set fitness(fitness: number) {
     this._fitness = fitness;
   }
 
+  /** Return genes */
   get genes(): GeneType[] {
     return this._genes;
   }
 
+  /** Set genes */
   set genes(genes: GeneType[]) {
     this._genes = genes;
   }
 
+  /** Returns length of chromosome */
   get length(): number {
     return this._genes.length;
   }
 }
 
+/**
+ * ## TagManager
+ * Manages the tags for a chromosome. Basically just extends set but implements an onChange listener.
+ *
+ * #### Basic usage
+ * @example
+ * ```typescript
+ *
+ * const chrom = new GenericChromosome<boolean>(3);
+ *
+ * const tagManager = new TagManager(chrom);
+ *
+ * // Add a `dead` tag
+ * tagManager.add('dead');
+ *
+ * // Clear tags
+ * tagManager.clear()
+ *
+ * // Check if tag exists
+ * tagManager.has('dead')
+ *
+ * // Delete tag
+ * tagManager.delete('dead')
+ *
+ * // On Change Listener
+ * tagManager.onChange(() => {
+ *    console.log("I'm called when anything is added or deleted!")
+ * });
+ *
+ * tagManager.add('test');
+ * // I'm called when anything is added or deleted!
+ * ```
+ */
 class TagManager extends Set {
+  /** List of on change listeners */
   private _changeListeners: ListenerObject[] = [];
+  /** Chromosome that the tag is attached too */
   private _chromosome: GenericChromosome<any>;
 
+  /**
+   * TagManager is initialized by passing in a chromosome. This chromosome is
+   * attached and passed into each onChange call to indicate the change.
+   *
+   * @example
+   * ```typescript
+   *
+   * const chrom = new GenericChromosome<boolean>(3);
+   *
+   * // Takes in any extension of GenericChromsome
+   * const tagManager = new TagManager(chrom);
+   * ```
+   *
+   * @param chromosome Chromsome to attach to
+   */
   constructor(chromosome: GenericChromosome<any>) {
     super();
 
     this._chromosome = chromosome;
   }
 
+  /**
+   * Adds a tag to the chromosome
+   *
+   * @example
+   * ```typescript
+   *
+   * tagManager.add('test')
+   * ```
+   *
+   * @param value Tag to add
+   */
   add(value: any) {
     super.add(value);
 
@@ -112,6 +192,19 @@ class TagManager extends Set {
     return this;
   }
 
+  /**
+   * Clears the tags in a chromosome
+   *
+   * @example
+   * ```typescript
+   *
+   * tagManager.add('test')
+   * tagManager.has('test') // True
+   *
+   * tagManager.clear()
+   * tagManager.has('test) // False
+   * ```
+   */
   clear() {
     super.clear();
 
@@ -120,6 +213,22 @@ class TagManager extends Set {
     });
   }
 
+  /**
+   * Delete a specific tag.
+   * Returns `false` if the tag does not exist.
+   *
+   * @example
+   * ```typescript
+   *
+   * tagManager.add('test');
+   * tagManager.has('test'); // True
+   *
+   * tagManager.delete('test');
+   * tagManager.has('test'); // False
+   * ``
+   *
+   * @param value Tag to delete
+   */
   delete(value: any) {
     this._changeListeners.forEach(f => {
       f.listener.apply(f.thisVal, [this._chromosome]);
@@ -128,14 +237,30 @@ class TagManager extends Set {
     return super.delete(value);
   }
 
+  /**
+   * Sets a listener for tag changes.
+   *
+   * @example
+   * ```typescript
+   *
+   * tagManager.onChange(chromsome => {
+   *    console.log("The following chromosome has changed: ");
+   *    console.log(chromsome);
+   * })
+   * ```
+   *
+   * @param listener
+   * @param thisVal
+   */
   onChange(
-    thisVal: any,
-    listener: (chromosome: GenericChromosome<any>) => void
+    listener: (chromosome: GenericChromosome<any>) => void,
+    thisVal?: any
   ) {
     this._changeListeners.push({ thisVal, listener });
   }
 }
 
+/** Type checking for the listener object */
 interface ListenerObject {
   thisVal: any;
   listener: (chromosome: GenericChromosome<any>) => void;

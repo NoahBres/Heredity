@@ -63,7 +63,7 @@ describe("Generic Chromosome", () => {
 
   test("Tag Manager onChange", () => {
     const hook = jest.fn();
-    chrom.tags.onChange(null, hook);
+    chrom.tags.onChange(hook);
     chrom.tags.add("test");
     chrom.tags.clear();
     chrom.tags.delete("clear");

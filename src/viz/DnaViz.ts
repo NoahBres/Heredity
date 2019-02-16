@@ -157,12 +157,12 @@ export default class DnaViz implements VizClass {
   /** Initialize DnaViz. Adds onChange tag listeners. Creates DnaPills. */
   init() {
     this._heredity.chromosomes.forEach(c => {
-      c.tags.onChange(this, chromosome => {
+      c.tags.onChange(chromosome => {
         // To suppress object is possibly undefined error
         const pilly = this._dnaPills.get(chromosome);
         /* istanbul ignore next */
         if (pilly) pilly!.update();
-      });
+      }, this);
     });
 
     if (this._parentElement.dataset.initialized) {
@@ -214,14 +214,14 @@ export default class DnaViz implements VizClass {
       });
 
       this._heredity.chromosomes.forEach(c => {
-        c.tags.onChange(this, chromosome => {
+        c.tags.onChange(chromosome => {
           // To suppress object is possibly undefined error
           const pilly = this._dnaPills.get(chromosome);
           /* istanbul ignore next */
           if (pilly) {
             pilly!.update();
           }
-        });
+        }, this);
       });
 
       this._lastChromosomeList = this._heredity.chromosomes;

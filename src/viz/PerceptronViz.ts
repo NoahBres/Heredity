@@ -360,9 +360,9 @@ export default class PerceptronViz implements VizClass {
         this.updateSVG();
       });
 
-      this._chromosome.tags.onChange(this._chromosome, () => {
+      this._chromosome.tags.onChange(() => {
         this.update();
-      });
+      }, this._chromosome);
     }
 
     // Drawing Initialize
@@ -445,9 +445,9 @@ export default class PerceptronViz implements VizClass {
           this.updateSVG();
         });
 
-        this._chromosome.tags.onChange(this._chromosome, () => {
+        this._chromosome.tags.onChange(() => {
           this.update();
-        });
+        }, this._chromosome);
       }
     }
 
