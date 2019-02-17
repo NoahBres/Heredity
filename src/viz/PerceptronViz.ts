@@ -356,9 +356,9 @@ export default class PerceptronViz implements VizClass {
     this._parentElement.appendChild(this._dnaPill.element);
 
     if (!this._disableHooks) {
-      this._chromosome.onCompute(this._chromosome, () => {
+      this._chromosome.onCompute(() => {
         this.updateSVG();
-      });
+      }, this._chromosome);
 
       this._chromosome.tags.onChange(() => {
         this.update();
@@ -441,9 +441,9 @@ export default class PerceptronViz implements VizClass {
 
     if (this._lastChromosome !== this._chromosome) {
       if (!this._disableHooks) {
-        this._chromosome!.onCompute(this._chromosome, () => {
+        this._chromosome!.onCompute(() => {
           this.updateSVG();
-        });
+        }, this._chromosome);
 
         this._chromosome.tags.onChange(() => {
           this.update();
@@ -666,9 +666,9 @@ export default class PerceptronViz implements VizClass {
         // this._options.index = undefined;
         this.init();
         if (!this._disableHooks) {
-          this._chromosome!.onCompute(this._chromosome, () => {
+          this._chromosome!.onCompute(() => {
             this.updateSVG();
-          });
+          }, this._chromosome);
         }
       }, this);
 

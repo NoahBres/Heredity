@@ -86,7 +86,7 @@ describe("Neural Chromosome", () => {
 
   test("On Compute", () => {
     const hook = jest.fn();
-    chrom2.onCompute(null, hook);
+    chrom2.onCompute(hook);
     chrom2.compute([0.5, 0.5]);
     expect(hook).toBeCalled();
   });
