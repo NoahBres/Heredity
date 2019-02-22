@@ -4,31 +4,33 @@
 
 ## Pre-production todo
 
-- Remove comments
-- Optimize dom manipulation in visualizations
-- Add getColors to the other chromosomes
-- Add new chromosomes
-- Create getter for the viz style ids and rewrite the tests to utilize that
-- Change tests to utilize variable div id
-- Search all files for TODO
-- Move addHook parameters around in Heredity.ts. Move fn before thisVal
-- Add examples to all public facing functions
+- [ ] Remove comments
+- [ ] Optimize dom manipulation in visualizations
+- [ ] Add getColors to the other chromosomes
+- [ ] Add new chromosomes
+- [ ] Create getter for the viz style ids and rewrite the tests to utilize that
+- [ ] Change tests to utilize variable div id
+- [ ] Search all files for TODO
+- [x] Move addHook parameters around in Heredity.ts. Move fn before thisVal
+- [ ] Add examples to all public facing functions
 
 ## Todo v1.5
 
-- NeuralChromosome automatically set gene length based on the perceptron passed through
-- Resize listener on SVG visualizations
-- Replace all viz css classes with the cssPrefix
-- Fix perceptron viz death switch to another gene issue
-- Add animations to visualizations
-- Change hover listener apis. Move this to second parameter to make default null
-- Add this autobinding for addHook
+- [ ] Set NeuralChromosome to automatically change on nextGeneration()
+- [ ] Have NeuralChromsome automatically set gene length
+- [ ] NeuralChromosome automatically set gene length based on the perceptron passed through
+- [ ] Resize listener on SVG visualizations
+- [ ] Replace all viz css classes with the cssPrefix
+- [ ] Fix perceptron viz death switch to another gene issue
+- [ ] Add animations to visualizations
+- [ ] Change hover listener apis. Move this to second parameter to make default null
+- [ ] Add this autobinding for addHook
 
 ## Todo v2
 
-- Remove d3. Draw manually with canvas/svg
-- Turn visualization modules into custom web components
-- Advanced visualization
+- [x] Remove d3. Draw manually with canvas/svg
+- [ ] Turn visualization modules into custom web components
+- [ ] Advanced visualization
 
 ## Documentation todo
 

@@ -39,11 +39,8 @@ import CerebrumData from "./Cerebrum.js/CerebrumData";
  * // [ 0.473456, 0.234625, 0.2346234 ]
  *
  * // Compute the neural net output nodes
- * n.compute();
+ * n.compute([0.237145, 0.614527]);
  * // [0.3452765]
- *
- * n.onCompute(() => {
- * })
  * ```
  */
 export default class NeuralChromosome extends NumberChromosome {
@@ -112,6 +109,8 @@ export default class NeuralChromosome extends NumberChromosome {
         activation
       );
     }
+
+    this._length = this._cerebrum.getWeights().length;
   }
 
   /** Generate random weights for the chromsome */
@@ -144,7 +143,26 @@ export default class NeuralChromosome extends NumberChromosome {
   }
 
   /**
-   * Compute the neural network.
+   * Compute the feed for-ward output of the neural network.
+   *
+   * @example
+   * ```typescript
+   * const n = new NeuralChromosome(
+   *   {
+   *     inputLength: 2,
+   *     hiddenLength: [2],
+   *     outputLength: 2
+   *   },
+   *   8 // This number has to match the number of weights
+   * );
+   *
+   * n.generate();
+   *
+   * n.compute([0.23457, 0.976143])
+   * // [ 0.349453, 0.869145 ]
+   * // The number of outputs matches the outputLength
+   * ```
+   *
    * @param inputs Array of input values
    */
   compute(inputs: number[]): number[] {
@@ -153,6 +171,10 @@ export default class NeuralChromosome extends NumberChromosome {
     return this._cerebrum.compute(inputs);
   }
 
+  /**
+   *
+   * @param weights
+   */
   setWeights(weights: number[]) {
     this._cerebrum.setWeights(weights);
   }
