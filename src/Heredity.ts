@@ -1,4 +1,5 @@
 import GenericChromosome from "./chromosomes/GenericChromosome";
+import NeuralChromosome from "./chromosomes/NeuralChromosome";
 import Population from "./Population";
 import { rankSelect } from "./selections";
 import { uniformCross } from "./crossovers";
@@ -221,7 +222,7 @@ export default class Heredity {
    * // New evolved generation is created
    * ```
    */
-  nextGeneration(): Heredity {
+  nextGeneration(setNeuralChromosome: boolean = true): Heredity {
     this._nextGenPreHook.forEach(e => {
       e.fn.apply(e.thisVal, []);
     });
@@ -291,6 +292,15 @@ export default class Heredity {
       totalChromosomes
     );
 
+    if (
+      setNeuralChromosome &&
+      this._templateChromosome instanceof NeuralChromosome
+    ) {
+      this.population.getGenes().forEach((val, i) => {
+        (<NeuralChromosome>this.chromosomes[i]).setWeights(val);
+      });
+    }
+
     this._nextGenPostHook.forEach(e => {
       e.fn.apply(e.thisVal, []);
     });
@@ -302,8 +312,8 @@ export default class Heredity {
    * Allows you to hook into various functions and run your own tasks prior and post each function run.
    *
    * @param type Specify the type of hook. Options: [ "genPopPre", "genPopPost", "nextGenPre", "nextGenPost" ]
-   * @param thisVal `this` value to be passed into the hook function
    * @param fn Hook function to be passed in
+   * @param thisVal `this` value to be passed into the hook function
    *
    * @example
    * ```typescript
