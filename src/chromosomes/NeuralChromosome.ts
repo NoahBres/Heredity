@@ -53,8 +53,12 @@ export default class NeuralChromosome extends NumberChromosome {
   private _computeListenerList: ComputeListenerObject[] = [];
 
   /**
+   * @example
+   * ```typescript
+   *
    * // Initialize a NeuralChromsome with 6 genes
    * // Creates a neural net with 2 input neurons, 1 hidden layer with 2 neurons, and 1 output neuron
+   * // Length of the chromosome will be set to the number of weights in the neural net
    * const n = new NeuralChromosome(
    *   {
    *     inputLength: 2,       // Number of neural net input nodes
@@ -62,20 +66,18 @@ export default class NeuralChromosome extends NumberChromosome {
    *     outputLength: 1,      // Number of neural net output nodes
    *     activation: NeuralChromosome.sigmoid // (optional) Activation function of the neural net
    *   },
-   *   6, // Number of genes (should match the amount of connections in the neural net)
    *   [0.5324, 0.652354, 0.362345, 0.12346, 0.948532, 0.572834], // (optional) Manually set the gene values
    *   45, // (optional) Fitness of the chromosome
    * );
+   * ```
    *
    * @param param0 Options for Cerebrum
-   * @param length Number of genes
    * @param genes Array of gene values
    * @param score Fitness of the chromosome
    * @param cerebrum Cerebrum to manualyl set
    */
   constructor(
     { inputLength, hiddenLength, outputLength, activation }: ConstructorOptions,
-    length: number,
     genes: number[] = [],
     score: number = 0,
     cerebrum?: Cerebrum
@@ -87,7 +89,7 @@ export default class NeuralChromosome extends NumberChromosome {
         round: false,
         clamp: false
       },
-      length,
+      0,
       genes,
       score
     );
@@ -111,6 +113,8 @@ export default class NeuralChromosome extends NumberChromosome {
     }
 
     this._length = this._cerebrum.getWeights().length;
+    // Fixes super length being a 0
+    if (!this._genes) this._genes = Array(this._length);
   }
 
   /** Generate random weights for the chromsome */
@@ -122,7 +126,6 @@ export default class NeuralChromosome extends NumberChromosome {
   duplicate(): NeuralChromosome {
     return new NeuralChromosome(
       this._cerebrumOptions,
-      this._length,
       this._genes,
       this._fitness,
       this._cerebrum
@@ -143,7 +146,7 @@ export default class NeuralChromosome extends NumberChromosome {
   }
 
   /**
-   * Compute the feed for-ward output of the neural network.
+   * Compute the feed forward output of the neural network.
    *
    * @example
    * ```typescript
@@ -152,8 +155,7 @@ export default class NeuralChromosome extends NumberChromosome {
    *     inputLength: 2,
    *     hiddenLength: [2],
    *     outputLength: 2
-   *   },
-   *   8 // This number has to match the number of weights
+   *   }
    * );
    *
    * n.generate();
