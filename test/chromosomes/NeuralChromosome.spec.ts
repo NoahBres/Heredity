@@ -6,25 +6,19 @@ describe("Neural Chromosome", () => {
   let chrom2: NeuralChromosome;
 
   beforeEach(() => {
-    chrom1 = new NeuralChromosome(
-      {
-        inputLength: 2,
-        hiddenLength: [2],
-        outputLength: 1,
-        activation: NeuralChromosome.sigmoid
-      },
-      6
-    );
+    chrom1 = new NeuralChromosome({
+      inputLength: 2,
+      hiddenLength: [2],
+      outputLength: 1,
+      activation: NeuralChromosome.sigmoid
+    });
 
-    chrom2 = new NeuralChromosome(
-      {
-        inputLength: 2,
-        hiddenLength: [2],
-        outputLength: 1,
-        activation: NeuralChromosome.tanh
-      },
-      6
-    );
+    chrom2 = new NeuralChromosome({
+      inputLength: 2,
+      hiddenLength: [2],
+      outputLength: 1,
+      activation: NeuralChromosome.tanh
+    });
   });
 
   test("Check if chromosome is initiated", () => {
