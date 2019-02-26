@@ -4,6 +4,7 @@
 
 ## Pre-production todo
 
+- [ ] Finish writing tests
 - [ ] Remove comments
 - [ ] Optimize dom manipulation in visualizations
 - [ ] Add getColors to the other chromosomes
