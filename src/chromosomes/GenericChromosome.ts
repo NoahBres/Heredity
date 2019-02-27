@@ -249,8 +249,8 @@ class TagManager extends Set {
    * })
    * ```
    *
-   * @param listener
-   * @param thisVal
+   * @param listener Function hook to be passed in
+   * @param thisVal `this` value to be passed into the hook function
    */
   onChange(
     listener: (chromosome: GenericChromosome<any>) => void,
