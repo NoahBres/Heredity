@@ -174,34 +174,68 @@ export default class NeuralChromosome extends NumberChromosome {
   }
 
   /**
+   * Set the weights of the neural net.
    *
+   * @example
+   * ```typescript
+   *
+   * n.setWeights([0.528492, -0.245964, 0.3025216, 0.14267, -0.86894]);
+   * ```
    * @param weights
    */
   setWeights(weights: number[]) {
     this._cerebrum.setWeights(weights);
   }
 
+  /** Return ths weights of the neural net */
   getWeights(): number[] {
     return this._cerebrum.getWeights();
   }
 
+  /**
+   * Set a listener that is called on every `compute()` call
+   *
+   * @example
+   * ```typescript
+   *
+   * n.onCompute(() => "I'm called on compute"));
+   *
+   * n.compute([0.928347, 0.1684392]);
+   * // I'm called on compute
+   * ```
+   *
+   * @param listener Function hook to be passed in
+   * @param thisVal `this` value to be passed into the hook function
+   */
   onCompute(listener: () => void, thisVal?: any) {
     this._computeListenerList.push({ thisVal, listener });
   }
 
+  /**
+   * Pass a number through a sigmoid function.
+   *
+   * https://en.wikipedia.org/wiki/Sigmoid_function
+   */
   static sigmoid(i: number): number {
     return 1 / (1 + Math.exp(-i));
   }
 
+  /**
+   * Pass a number through a tanh function
+   *
+   * http://mathworld.wolfram.com/HyperbolicTangent.html
+   */
   static tanh(i: number): number {
     return Math.tanh(i);
   }
 
+  /** Returns the Cerebrum of the NeuralChromosome */
   get cerebrum(): Cerebrum {
     return this._cerebrum;
   }
 }
 
+/** Type checking for the constructor */
 interface ConstructorOptions {
   inputLength: number;
   hiddenLength: number[];
@@ -209,6 +243,7 @@ interface ConstructorOptions {
   activation: (input: number) => number;
 }
 
+/** Type checking for the listener object */
 interface ComputeListenerObject {
   thisVal: any;
   listener: () => void;
