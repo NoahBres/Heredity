@@ -134,6 +134,7 @@ export default class NumberChromosome extends GenericChromosome<number> {
   }
 }
 
+/** Type checking for the constructor */
 interface ConstructorOptions {
   lowerBound?: number;
   upperBound?: number;

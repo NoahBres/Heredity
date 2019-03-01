@@ -48,7 +48,7 @@
 - [x] viz/VizClassViz.ts
 - [x] chromosomes/BitChromosomes.ts
 - [x] chromosomes/GenericChromosome.ts
-- [ ] chromosomes/NeuralChromosome.ts
+- [x] chromosomes/NeuralChromosome.ts
 - [ ] chromosomes/NumberChromosome.ts
 - [ ] Cerebrum.js/BitChromosome.ts
 - [ ] Cerebrum.js/Cerebrum.ts
