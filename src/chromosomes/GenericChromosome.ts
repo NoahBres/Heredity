@@ -6,7 +6,7 @@
  * @example
  * ```typescript
  *
- * import GenericChromosome from "heredity";
+ * import { GenericChromosome } from "heredity";
  *
  * class BitChromosome extends GenericChromosome<boolean> {
  *    generate(): BitChromosome {

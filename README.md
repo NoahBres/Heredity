@@ -49,7 +49,7 @@
 - [x] chromosomes/BitChromosomes.ts
 - [x] chromosomes/GenericChromosome.ts
 - [x] chromosomes/NeuralChromosome.ts
-- [ ] chromosomes/NumberChromosome.ts
+- [x] chromosomes/NumberChromosome.ts
 - [ ] Cerebrum.js/BitChromosome.ts
 - [ ] Cerebrum.js/Cerebrum.ts
 - [ ] Cerebrum.js/CerebrumData.ts
