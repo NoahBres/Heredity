@@ -52,6 +52,6 @@
 - [x] chromosomes/NumberChromosome.ts
 - [x] Cerebrum.js/BitChromosome.ts
 - [x] Cerebrum.js/Cerebrum.ts
-- [ ] Cerebrum.js/CerebrumData.ts
+- [x] Cerebrum.js/CerebrumData.ts
 - [ ] Cerebrum.js/Layer.ts
 - [ ] Cerebrum.js/Neuron.ts
