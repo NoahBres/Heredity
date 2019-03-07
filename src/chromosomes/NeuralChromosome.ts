@@ -9,6 +9,7 @@ import CerebrumData from "./Cerebrum.js/CerebrumData";
  * Extends the NumberChromosome.
  *
  * #### Basic usage
+ *
  * @example
  * ```typescript
  *
@@ -114,7 +115,9 @@ export default class NeuralChromosome extends NumberChromosome {
 
     this._length = this._cerebrum.getWeights().length;
     // Fixes super length being a 0
-    if (!this._genes) this._genes = Array(this._length);
+    if (!this._genes || (this._genes.length === 0 && this._length !== 0)) {
+      this._genes = Array(this._length);
+    }
   }
 
   /** Generate random weights for the chromsome */
