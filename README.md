@@ -50,8 +50,8 @@
 - [x] chromosomes/GenericChromosome.ts
 - [x] chromosomes/NeuralChromosome.ts
 - [x] chromosomes/NumberChromosome.ts
-- [ ] Cerebrum.js/BitChromosome.ts
-- [ ] Cerebrum.js/Cerebrum.ts
+- [x] Cerebrum.js/BitChromosome.ts
+- [x] Cerebrum.js/Cerebrum.ts
 - [ ] Cerebrum.js/CerebrumData.ts
 - [ ] Cerebrum.js/Layer.ts
 - [ ] Cerebrum.js/Neuron.ts

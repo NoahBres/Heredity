@@ -1,6 +1,31 @@
 import Layer from "./Layer";
 import CerebrumData from "./CerebrumData";
 
+/**
+ * ## Cerebrum
+ * A basic mutli layered neural network.
+ *
+ * #### Basic Usage
+ * @example
+ * ```typescript
+ *
+ * import { Cerebrum } from "heredity";
+ *
+ * // Creates a neural net with 2 input neurons, 1 hidden layer with 2 neurons, and 1 neuron in the output layer
+ * const c = new Cerebrum(2, [2], 1);
+ *
+ * // Sets the weights of the neural network connections
+ * c.setWeights([0.473456, 0.234625, 0.2346234]);
+ *
+ * // Get weights of the neural network connections
+ * c.getWeights();
+ * // [ 0.473456, 0.234625, 0.2346234 ]
+ *
+ * // Compute the neural net output nodes
+ * c.compute([0.237145, 0.614527]);
+ * // [0.3452765]
+ * ```
+ */
 export default class Cerebrum {
   private _layers: Layer[] = [];
 
@@ -28,6 +53,7 @@ export default class Cerebrum {
     this._activation = activation;
   }
 
+  /** Export the state of the neural net */
   export(): CerebrumData {
     const data: CerebrumData = {
       neuronsInLayer: [],
@@ -46,6 +72,7 @@ export default class Cerebrum {
     return data;
   }
 
+  /** Import a state of a neural net */
   import(data: CerebrumData) {
     this._layers = [];
 
@@ -69,7 +96,18 @@ export default class Cerebrum {
       this._layers.push(layer);
     }
   }
-
+  /**
+   * Compute the feed forward output of the neural network.
+   *
+   * @example
+   * ```typescript
+   * c.compute([0.23457, 0.976143])
+   * // [ 0.349453, 0.869145 ]
+   * // The number of outputs matches the outputLength
+   * ```
+   *
+   * @param inputs Array of input values
+   */
   compute(inputs: number[]): number[] {
     for (let i = 0; i < inputs.length; i++) {
       /* istanbul ignore next */
@@ -104,14 +142,34 @@ export default class Cerebrum {
     return output;
   }
 
+  /**
+   * Pass a number through a sigmoid function.
+   *
+   * https://en.wikipedia.org/wiki/Sigmoid_function
+   */
   sigmoid(i: number): number {
     return 1 / (1 + Math.exp(-i));
   }
 
+  /**
+   * Pass a number through a tanh function
+   *
+   * http://mathworld.wolfram.com/HyperbolicTangent.html
+   */
   tanh(i: number): number {
     return Math.tanh(i);
   }
 
+  /**
+   * Set the weights of the neural net.
+   *
+   * @example
+   * ```typescript
+   *
+   * c.setWeights([0.528492, -0.245964, 0.3025216, 0.14267, -0.86894]);
+   * ```
+   * @param weights
+   */
   setWeights(weights: number[]): Cerebrum {
     let weightsIndex = 0;
 
@@ -128,6 +186,7 @@ export default class Cerebrum {
     return this;
   }
 
+  /** Return the weights of the neural net */
   getWeights(): number[] {
     const d = [];
 
@@ -142,14 +201,17 @@ export default class Cerebrum {
     return d;
   }
 
+  /** Set the layers */
   set layers(layers: Layer[]) {
     this._layers = layers;
   }
 
+  /** Get the layers */
   get layers(): Layer[] {
     return this._layers;
   }
 
+  /** Get activation */
   get activation(): (arg1: number) => void {
     return this._activation;
   }
